@@ -7,7 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9D506D70244BC0C80065BB9C /* CFG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D506D6E244BC0C80065BB9C /* CFG.cpp */; };
+		9D506D79244DBFE00065BB9C /* IR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D506D77244DBFE00065BB9C /* IR.cpp */; };
+		9D506D7C244DC0DE0065BB9C /* ASM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D506D7A244DC0DE0065BB9C /* ASM.cpp */; };
 		9D8D5875244B6BCF00A8C463 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D8D5874244B6BCF00A8C463 /* main.cpp */; };
+		9D8D587D244B6BEE00A8C463 /* Project.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D8D587B244B6BEE00A8C463 /* Project.cpp */; };
+		9D8D5880244B6C1F00A8C463 /* Type.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D8D587E244B6C1F00A8C463 /* Type.cpp */; };
+		9D8D5883244B6D7500A8C463 /* Lexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D8D5881244B6D7500A8C463 /* Lexer.cpp */; };
+		9D8D5886244B6D7E00A8C463 /* AST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D8D5884244B6D7E00A8C463 /* AST.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,8 +30,23 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9D506D6E244BC0C80065BB9C /* CFG.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CFG.cpp; sourceTree = "<group>"; };
+		9D506D6F244BC0C80065BB9C /* CFG.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CFG.hpp; sourceTree = "<group>"; };
+		9D506D77244DBFE00065BB9C /* IR.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IR.cpp; sourceTree = "<group>"; };
+		9D506D78244DBFE00065BB9C /* IR.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IR.hpp; sourceTree = "<group>"; };
+		9D506D7A244DC0DE0065BB9C /* ASM.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ASM.cpp; sourceTree = "<group>"; };
+		9D506D7B244DC0DE0065BB9C /* ASM.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ASM.hpp; sourceTree = "<group>"; };
+		9D506D7E244E3EB90065BB9C /* example.dul */ = {isa = PBXFileReference; lastKnownFileType = text; path = example.dul; sourceTree = "<group>"; };
 		9D8D5871244B6BCF00A8C463 /* DulCompiler */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DulCompiler; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D8D5874244B6BCF00A8C463 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		9D8D587B244B6BEE00A8C463 /* Project.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Project.cpp; sourceTree = "<group>"; };
+		9D8D587C244B6BEE00A8C463 /* Project.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Project.hpp; sourceTree = "<group>"; };
+		9D8D587E244B6C1F00A8C463 /* Type.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Type.cpp; sourceTree = "<group>"; };
+		9D8D587F244B6C1F00A8C463 /* Type.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Type.hpp; sourceTree = "<group>"; };
+		9D8D5881244B6D7500A8C463 /* Lexer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Lexer.cpp; sourceTree = "<group>"; };
+		9D8D5882244B6D7500A8C463 /* Lexer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Lexer.hpp; sourceTree = "<group>"; };
+		9D8D5884244B6D7E00A8C463 /* AST.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AST.cpp; sourceTree = "<group>"; };
+		9D8D5885244B6D7E00A8C463 /* AST.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AST.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,6 +60,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9D506D7D244E3EA40065BB9C /* Testing */ = {
+			isa = PBXGroup;
+			children = (
+				9D506D7E244E3EB90065BB9C /* example.dul */,
+			);
+			path = Testing;
+			sourceTree = "<group>";
+		};
 		9D8D5868244B6BCF00A8C463 = {
 			isa = PBXGroup;
 			children = (
@@ -57,7 +87,22 @@
 		9D8D5873244B6BCF00A8C463 /* DulCompiler */ = {
 			isa = PBXGroup;
 			children = (
+				9D506D7D244E3EA40065BB9C /* Testing */,
 				9D8D5874244B6BCF00A8C463 /* main.cpp */,
+				9D8D587B244B6BEE00A8C463 /* Project.cpp */,
+				9D8D587C244B6BEE00A8C463 /* Project.hpp */,
+				9D8D587E244B6C1F00A8C463 /* Type.cpp */,
+				9D8D587F244B6C1F00A8C463 /* Type.hpp */,
+				9D8D5881244B6D7500A8C463 /* Lexer.cpp */,
+				9D8D5882244B6D7500A8C463 /* Lexer.hpp */,
+				9D8D5884244B6D7E00A8C463 /* AST.cpp */,
+				9D8D5885244B6D7E00A8C463 /* AST.hpp */,
+				9D506D6E244BC0C80065BB9C /* CFG.cpp */,
+				9D506D6F244BC0C80065BB9C /* CFG.hpp */,
+				9D506D77244DBFE00065BB9C /* IR.cpp */,
+				9D506D78244DBFE00065BB9C /* IR.hpp */,
+				9D506D7A244DC0DE0065BB9C /* ASM.cpp */,
+				9D506D7B244DC0DE0065BB9C /* ASM.hpp */,
 			);
 			path = DulCompiler;
 			sourceTree = "<group>";
@@ -119,7 +164,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9D506D70244BC0C80065BB9C /* CFG.cpp in Sources */,
+				9D506D7C244DC0DE0065BB9C /* ASM.cpp in Sources */,
+				9D8D5886244B6D7E00A8C463 /* AST.cpp in Sources */,
+				9D8D5880244B6C1F00A8C463 /* Type.cpp in Sources */,
 				9D8D5875244B6BCF00A8C463 /* main.cpp in Sources */,
+				9D8D5883244B6D7500A8C463 /* Lexer.cpp in Sources */,
+				9D506D79244DBFE00065BB9C /* IR.cpp in Sources */,
+				9D8D587D244B6BEE00A8C463 /* Project.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
