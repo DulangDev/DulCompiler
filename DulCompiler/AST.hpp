@@ -49,7 +49,11 @@ public:
         BLOCK,
         IN,
         UMIN,
-        UPLUS
+        UPLUS,
+        EMPTY,
+        _TRUE,
+        _FALSE,
+        INTERFACE
     };
     
     
@@ -91,6 +95,7 @@ public:
     }
     
     static AstNode* parseFile(const char * name);
+private:
     static AstNode* parseCompound(lexIter&);
     static AstNode* parseStatement(lexIter&);
     static AstNode* parseExpr(lexIter&);
@@ -107,6 +112,9 @@ public:
     static AstNode* parseClassDef(lexIter&);
     static AstNode* parseFuncDef(lexIter&);
     static AstNode* parseInterface(lexIter&);
+    static AstNode* parseIf(lexIter&);
+    static AstNode* parseFor(lexIter&);
+    static AstNode* parseWhile(lexIter&);
     
 };
 

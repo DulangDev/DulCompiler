@@ -94,7 +94,7 @@ char* LexemScanner::scanLexem(){
         linepos += len;
         currpos += len;
         for(int i = 0; i < sizeof(Lexem::kwText)/sizeof(char*); i++){
-            if(strcmp(scanpos, Lexem::kwText[i]) == 0){
+            if(strncmp(scanpos, Lexem::kwText[i], strlen(Lexem::kwText[i])) == 0){
                 lexems.push_back(Lexem{
                     lineno, linepos - len,
                     (Lexem::type)(i+(int)Lexem::KWFUN),
@@ -117,7 +117,7 @@ char* LexemScanner::scanLexem(){
         double val = strtod(scanpos, &endnum);
         int len = int(endnum - currpos);
         currpos += len;
-        lineno += len;
+        linepos += len;
         if(val == (long long)val){
             lexems.push_back(Lexem{
                 .lineno =lineno,
@@ -196,10 +196,14 @@ const char * Lexem::typeRepr [] = {
     "KWWHILE",
     "KWIF",
     "KWELSE",
-    
+    "KWOR",
+    "KWAND",
+    "KWNOT",
     "KWTRUE",
     "KWFALSE",
     "KWINTERFACE",
     "KWHAS",
-    "KWIMPORT"
+    "KWIMPORT",
+    "CLASS",
+    "END"
 };

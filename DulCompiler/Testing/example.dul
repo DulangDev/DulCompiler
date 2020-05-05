@@ -1,1 +1,9 @@
-a = 3 + 9 * 7.8
+a = 9, 7
+fun a(a:Int, b:Float){
+    return b(0)
+}
+class a has b, c{
+    fun f(){
+        return
+    }
+}

@@ -15,23 +15,20 @@ AstNode* AstNode::parseFile(const char * name){
     lexIter iter = scanner.getIterator();
     try{
         return parseCompound(iter);
-    } catch(int errcode){
+    } catch(SyntaxError err){
+        fprintf(stderr, "Syntax error at %d:%d  %s\n", err.lineno, err.linepos, err.message);
         return 0;
     }
 }
 
 
 
+
 AstNode* AstNode::parseCompound(lexIter& iter){
     AstNode * block = new AstNode(BLOCK);
     while(not iter->isClosing()){
-        try {
             AstNode * statement = parseStatement(iter);
             block->add(statement);
-        } catch (SyntaxError error) {
-            fprintf(stderr, "Syntax error at %d:%d\n%s\n", error.lineno, error.linepos, error.message);
-            throw COMP_ERR;
-        }
     }
     return block;
 }
@@ -50,8 +47,43 @@ AstNode* AstNode::parseStatement(lexIter& iter){
         }
         case Lexem::EOL:{
             iter++;
+            return new AstNode(EMPTY);
         }break;
-#warning TODO: for if, while, for
+        case Lexem::KWRET:{
+            iter++;
+            AstNode * expression;
+            if(iter->lexType != Lexem::EOL)
+                expression = parseExpr(iter);
+            else
+                expression = new AstNode(EMPTY);
+            iter++;
+            return new AstNode(RET, {expression});
+            
+        }
+        case Lexem::KWIF:{
+            iter++;
+            return parseIf(iter);
+        }break;
+        case Lexem::KWWHILE:{
+            iter++;
+            return parseWhile(iter);
+        }break;
+        case Lexem::KWFOR:{
+            iter++;
+            return parseFor(iter);
+        }break;
+        case Lexem::KWCLASS:{
+            iter++;
+            return parseClassDef(iter);
+        }break;
+        case Lexem::KWINTERFACE:{
+            iter++;
+            return parseInterface(iter);
+        }break;
+        case Lexem::KWFUN:{
+            iter++;
+            return parseFuncDef(iter);
+        }
         default:{
             AstNode * lval = parseExpr(iter);
             Lexem next = *iter;
@@ -69,7 +101,16 @@ AstNode* AstNode::parseStatement(lexIter& iter){
     
 }
 AstNode* AstNode::parseExpr(lexIter& i){
-    return parseLogOr(i);
+    AstNode * first = parseLogOr(i);
+    if(i->lexType == Lexem::COMMA){
+        first = new AstNode(TUPLE, {first});
+        while(i->lexType == Lexem::COMMA){
+            i++;
+            AstNode * cur = parseLogOr(i);
+            first->add(cur);
+        }
+    }
+    return first;
 }
 AstNode* AstNode::parseLogOr(lexIter& i){
     AstNode * leftmost = parseLogAnd(i);
@@ -176,6 +217,14 @@ AstNode* AstNode::parseSuffix(lexIter& i){
         }
         i++;
         return new AstNode(FCALL, {left, expr});
+    } else if(i->lexType == Lexem::DOT){
+        i++;
+        AstNode * rhs = parseSuffix(i);
+        return new AstNode(AT, {left, rhs});
+    } else if(i->lexType == Lexem::COLON){
+        i++;
+        AstNode * type = parseSuffix(i);
+        return new AstNode(TYPEDECL, {left, type});
     }
     return left;
 }
@@ -218,14 +267,92 @@ AstNode* AstNode::parseTopLevel(lexIter& i){
             i++;
             return intlit;
         }break;
+        case Lexem::KWTRUE:{
+            i++;
+            return new AstNode(_TRUE);
+        }break;
+        case Lexem::KWFALSE:{
+            i++;
+            return new AstNode(_FALSE);
+        }break;
         default:
             throw SyntaxError{i->lineno, i->linepos, (char*)"top level expection expected"};
             break;
     }
 }
-/*AstNode* AstNode::parseClassDef(lexIter&);
-AstNode* AstNode::parseFuncDef(lexIter&);
-AstNode* AstNode::parseInterface(lexIter&);*/
+AstNode* AstNode::parseClassDef(lexIter& i){
+    AstNode * classdef = new AstNode(CLASSDEF);
+    AstNode * name = parseTopLevel(i);
+    classdef->add(name);
+    if(i->lexType == Lexem::KWHAS){
+        i++;
+        AstNode * extending = parseExpr(i);
+        classdef->add(extending);
+    }
+    if(i->lexType != Lexem::OP_BRACE){
+        throw SyntaxError{i->lineno, i->linepos, "expected { at class declaration"};
+    }
+    i++;
+    AstNode * block = parseCompound(i);
+    if(i->lexType != Lexem::CL_BRACE){
+        throw SyntaxError{i->lineno, i->linepos, "expected } at end of class declaration"};
+    }
+    i++;
+    classdef->add(block);
+    return classdef;
+}
+AstNode* AstNode::parseFuncDef(lexIter& i){
+    //kyeword fun is skipped already
+    AstNode * fundecl = new AstNode(FUNCDEF);
+    AstNode * name = parseTopLevel(i);
+    if(i->lexType != Lexem::OP_R_BR){
+        throw SyntaxError{i->lineno, i->linepos, "( expected at function declaration"};
+    }
+    i++;
+    AstNode * args;
+    if(i->lexType != Lexem::CL_R_BR)
+         args = parseExpr(i);
+    else
+        args = new AstNode(EMPTY);
+    if(i->lexType != Lexem::CL_R_BR){
+        throw SyntaxError{i->lineno, i->linepos, ") expected after parameter list"};
+    }
+    fundecl->add(name);
+    fundecl->add(args);
+    i++;
+    
+    if(i->lexType != Lexem::OP_BRACE){
+        //think of it as abstract fundecl
+        return fundecl;
+    }
+    i++;
+    i++;
+    AstNode * body = parseCompound(i);
+    if(i->lexType != Lexem::CL_BRACE){
+        throw SyntaxError{i->lineno, i->linepos, "expected } at end of function body"};
+    }
+    i++;
+    fundecl->add(body);
+    return fundecl;
+}
+
+
+AstNode* AstNode::parseInterface(lexIter&i){
+    AstNode * idef = new AstNode(INTERFACE);
+    AstNode * name = parseTopLevel(i);
+    idef->add(name);
+    if(i->lexType != Lexem::OP_BRACE){
+        throw SyntaxError{i->lineno, i->linepos, "expected { at class declaration"};
+    }
+    i++;
+    AstNode * block = parseCompound(i);
+    if(i->lexType != Lexem::CL_BRACE){
+        throw SyntaxError{i->lineno, i->linepos, "expected } at end of class declaration"};
+    }
+    i++;
+    idef->add(block);
+    return idef;
+}
 
 const char * AstNode::typerepr [] = {
     "RET",
@@ -261,5 +388,68 @@ const char * AstNode::typerepr [] = {
     "BLOCK",
     "IN",
     "UMIN",
-    "UPLUS"
+    "UPLUS",
+    "NOP",
+    "TRUE",
+    "FALSE",
+    "INTERFACE"
 };
+
+AstNode* AstNode::parseIf(lexIter& i){
+    AstNode * cond_expr = parseExpr(i);
+    if(i->lexType != Lexem::OP_BRACE){
+        throw SyntaxError{i->lineno, i->linepos, "expected { after if statement"};
+    }
+    i++;
+    AstNode * if_block = parseCompound(i);
+    if(i->lexType != Lexem::CL_BRACE){
+        throw SyntaxError{i->lineno, i->linepos, "expected } after if body statement"};
+    }
+    i++;
+    AstNode * ifstat = new AstNode(IF, {cond_expr, if_block});
+    if(i->lexType == Lexem::KWELSE){
+        i++;
+        if(i->lexType != Lexem::OP_BRACE){
+            throw SyntaxError{i->lineno, i->linepos, "expected { after else statement"};
+        }
+        AstNode * elseblock = parseCompound(i);
+        if(i->lexType != Lexem::CL_BRACE){
+            throw SyntaxError{i->lineno, i->linepos, "expected } after else body statement"};
+        }
+        i++;
+        ifstat->add(elseblock);
+        
+    }
+    return ifstat;
+}
+AstNode* AstNode::parseFor(lexIter&i){
+    AstNode * iter_name = parseTopLevel(i);
+    if(i->lexType != Lexem::KWIN){
+        throw SyntaxError{i->lineno, i->linepos, "expected in after for iterator name"};
+    }
+    i++;
+    AstNode * coll = parseExpr(i);
+    if(i->lexType != Lexem::OP_BRACE){
+        throw SyntaxError{i->lineno, i->linepos, "expected { after for"};
+    }
+    i++;
+    AstNode * body = parseCompound(i);
+    if(i->lexType != Lexem::CL_BRACE){
+        throw SyntaxError{i->lineno, i->linepos, "expected } after for"};
+    }
+    i++;
+    return new AstNode(FOR, {iter_name, coll, body});
+}
+AstNode* AstNode::parseWhile(lexIter&i){
+    AstNode * while_expr = parseExpr(i);
+    if(i->lexType != Lexem::OP_BRACE){
+        throw SyntaxError{i->lineno, i->linepos, "expected { after while"};
+    }
+    i++;
+    AstNode * body = parseCompound(i);
+    if(i->lexType != Lexem::CL_BRACE){
+        throw SyntaxError{i->lineno, i->linepos, "expected } after while"};
+    }
+    i++;
+    return new AstNode(WHILE, {while_expr, body});
+}

@@ -130,7 +130,7 @@ public:
             currpos = scanLexem();
         }
         lexems.push_back(Lexem{
-            0, 0, Lexem::END, 0
+            lineno, linepos, Lexem::END, 0
         });
         
     }
@@ -148,7 +148,7 @@ public:
 
 struct SyntaxError{
     int lineno, linepos;
-    char * message;
+    const char * message;
 };
 
 
