@@ -41,6 +41,7 @@ AstNode* AstNode::parseStatement(lexIter& iter){
     // upd if statement, while and for
     switch (iter->lexType) {
         case Lexem::KWWRITE:{
+            iter++;
             AstNode * expr_part = parseExpr(iter);
             iter++;
             return new AstNode(WRITE, {expr_part});
@@ -101,17 +102,29 @@ AstNode* AstNode::parseStatement(lexIter& iter){
     
 }
 AstNode* AstNode::parseExpr(lexIter& i){
-    AstNode * first = parseLogOr(i);
+    AstNode * first = parseAs(i);
     if(i->lexType == Lexem::COMMA){
         first = new AstNode(TUPLE, {first});
         while(i->lexType == Lexem::COMMA){
             i++;
-            AstNode * cur = parseLogOr(i);
+            AstNode * cur = parseAs(i);
             first->add(cur);
         }
     }
     return first;
 }
+
+AstNode * AstNode::parseAs(lexIter &i){
+    AstNode * expr = parseLogOr(i);
+    if(i->lexType == Lexem::AS){
+        i++;
+        AstNode * type = parseSuffix(i);
+        return new AstNode(TYPECAST, {expr, type});
+        
+    }
+    return expr;
+}
+
 AstNode* AstNode::parseLogOr(lexIter& i){
     AstNode * leftmost = parseLogAnd(i);
     while(i->lexType == Lexem::KWOR){
@@ -203,7 +216,10 @@ AstNode* AstNode::parseSuffix(lexIter& i){
     AstNode * left = parseTopLevel(i);
     if(i->lexType == Lexem::OP_R_BR){
         i++;
-        AstNode * expr = parseExpr(i);
+        AstNode * expr;
+        if(i->lexType == Lexem::CL_R_BR){
+            expr = new AstNode(EMPTY);
+        } else expr = parseExpr(i);
         if(i->lexType != Lexem::CL_R_BR){
             throw SyntaxError{i->lineno, i->linepos, (char*)"expected ) bracket here"};
         }
@@ -211,12 +227,15 @@ AstNode* AstNode::parseSuffix(lexIter& i){
         return new AstNode(FCALL, {left, expr});
     } else if(i->lexType == Lexem::OP_S_BR){
         i++;
-        AstNode * expr = parseExpr(i);
+        AstNode * expr;
+        if(i->lexType == Lexem::CL_S_BR){
+            expr = new AstNode(EMPTY);
+        } else expr = parseExpr(i);
         if(i->lexType != Lexem::CL_S_BR){
             throw SyntaxError{i->lineno, i->linepos, (char*)"expected ] bracket here"};
         }
         i++;
-        return new AstNode(FCALL, {left, expr});
+        return new AstNode(SUBSCR, {left, expr});
     } else if(i->lexType == Lexem::DOT){
         i++;
         AstNode * rhs = parseSuffix(i);
@@ -225,6 +244,10 @@ AstNode* AstNode::parseSuffix(lexIter& i){
         i++;
         AstNode * type = parseSuffix(i);
         return new AstNode(TYPEDECL, {left, type});
+    } else if(i->lexType == Lexem::ARROW){
+        i++;
+        AstNode * _t = parseSuffix(i);
+        return new AstNode(FUNTYPEDECL, {left, _t});
     }
     return left;
 }
@@ -232,11 +255,16 @@ AstNode* AstNode::parseTopLevel(lexIter& i){
     switch (i->lexType) {
         case Lexem::OP_R_BR:{
             i++;
-            AstNode * expr = parseExpr(i);
+            AstNode * expr;
+            if(i->lexType == Lexem::CL_R_BR){
+                expr = new AstNode(EMPTY);
+                i++;
+            } else {expr = parseExpr(i);
             if(i->lexType != Lexem::CL_R_BR){
                 throw SyntaxError{i->lineno, i->linepos, (char*)"expected ) bracket here"};
             }
-            i++;
+                i++;
+            }
             return expr;
         }break;
         case Lexem::NAME:{
@@ -304,7 +332,9 @@ AstNode* AstNode::parseClassDef(lexIter& i){
 AstNode* AstNode::parseFuncDef(lexIter& i){
     //kyeword fun is skipped already
     AstNode * fundecl = new AstNode(FUNCDEF);
-    AstNode * name = parseTopLevel(i);
+    AstNode * name = new AstNode(EMPTY);
+    if(i->lexType != Lexem::OP_R_BR)
+        name = parseTopLevel(i);
     if(i->lexType != Lexem::OP_R_BR){
         throw SyntaxError{i->lineno, i->linepos, "( expected at function declaration"};
     }
@@ -320,7 +350,13 @@ AstNode* AstNode::parseFuncDef(lexIter& i){
     fundecl->add(name);
     fundecl->add(args);
     i++;
-    
+    if(i->lexType != Lexem::OP_BRACE){
+        //return type given
+        AstNode * ret = parseSuffix(i);
+        fundecl->add(ret);
+    } else {
+        fundecl->add(new AstNode(EMPTY));
+    }
     if(i->lexType != Lexem::OP_BRACE){
         //think of it as abstract fundecl
         return fundecl;
@@ -392,7 +428,10 @@ const char * AstNode::typerepr [] = {
     "NOP",
     "TRUE",
     "FALSE",
-    "INTERFACE"
+    "INTERFACE",
+    "SUBSCR",
+    "TYPECAST",
+    "FUNTYPEDECL"
 };
 
 AstNode* AstNode::parseIf(lexIter& i){
@@ -452,4 +491,196 @@ AstNode* AstNode::parseWhile(lexIter&i){
     }
     i++;
     return new AstNode(WHILE, {while_expr, body});
+}
+
+
+void AstNode::inferTypes(){
+    if(namescope == nullptr){
+        throw "cannot infer types without context";
+    }
+    
+    if(t != ASSIGN && t!= FUNCDEF)
+    for(int i = 0; i < children.size(); i++){
+        children[i]->inferTypes();
+    } else children[1]->inferTypes();
+    switch (t) {
+        case EMPTY:
+            val_type = &VoidType;
+            break;
+        case INTLIT:
+            val_type = &IntType;
+            break;
+        case FLOATLIT:
+            val_type = &FloatType;
+            break;
+        case STRLIT:
+            val_type = &StringType;
+            break;
+        case TYPECAST:{
+            Type * _t;
+            if(children[1]->t == NAME)
+                 _t = (*(LayoutType*)children[1]->val_type)["return"];
+            else{
+                _t = children[1]->val_type;
+            }
+            val_type = _t;
+        }break;
+        case FCALL:{
+            val_type = (*(LayoutType*)children[0]->val_type)["return"];
+        }break;
+        case FUNTYPEDECL:{
+            Type * arg, *ret;
+            if(children[0]->t == TUPLE){
+                std::vector<Type*> types;
+                for(auto c: children[0]->children){
+                    types.push_back((*(LayoutType*)c->val_type)["return"]);
+                }
+                arg = LayoutType::createTuple(types);
+            } else if(children[0]->t == NAME){
+                arg = (*(LayoutType*)children[0]->val_type)["return"];
+            } else if(children[0]->t == EMPTY){
+                arg = &VoidType;
+            } else {
+#warning TODO: throw semantic error
+            }
+            ret = (*(LayoutType*)children[1]->val_type)["return"];
+            val_type = LayoutType::createFunctionalType(ret, arg);
+        }break;
+        case MUL:
+        case ADD:
+        case SUB:
+        case DIV:{
+            AstNode * lhs = children[0];
+            AstNode * rhs = children[1];
+            if(lhs->val_type == &IntType && rhs->val_type == &IntType){
+                val_type = &IntType;
+            } else if( lhs->val_type->isNumeric() && rhs->val_type->isNumeric() ){
+                //both are numeric but not both are integer
+                val_type = &FloatType;
+            }
+            if(lhs->val_type == &StringType && rhs->val_type == &StringType && t == ADD){
+                val_type = &StringType;
+            }
+            if(!val_type)
+                throw new SyntaxError{0, 0, "cannot infer type"};
+            
+        }break;
+        case RET:
+        case WRITE:
+            val_type = children[0]->val_type;
+            break;
+        case AT:{
+            
+        }break;
+        case NAME:{
+            val_type = (*namescope)[memval];
+        }break;
+        case TYPEDECL:{
+            AstNode * rhs = children[1];
+            if(rhs->t == SUBSCR){
+                //is mapping
+                Type * valtype = (*(LayoutType*)(rhs->children[0]->val_type))["return"];
+                Type * mapType;
+                if(rhs->children[1]->t != EMPTY)
+                    mapType = (*(LayoutType*)(rhs->children[1])->val_type)["return"];
+                else
+                    mapType = &IntType;
+                LayoutType * newMapType = LayoutType::createMap(mapType, valtype);
+                rhs->val_type = newMapType;
+                children[0]->val_type = newMapType;
+            } else if(rhs->t == NAME){
+                children[0]->val_type = (*(LayoutType*)(rhs->val_type))["return"];
+            } else {
+                children[0]->val_type = children[1]->val_type;
+            }
+            namescope->addType(children[0]->memval, children[0]->val_type);
+            val_type = children[0]->val_type;
+        }break;
+        case TUPLE:{
+            std::vector<Type*> v;
+            for(const auto child:children){
+                v.push_back(child->val_type);
+            }
+            val_type = LayoutType::createTuple(v);
+        }break;
+            
+        case FUNCDEF:{
+            LayoutType * localnamescope = LayoutType::createNamespace();
+            AstNode * name = children[0];
+            AstNode * args = children[1];
+            AstNode * ret = children[2];
+            
+            ret->inferTypes();
+            
+            Type * ret_type  = &VoidType;
+            if(ret->val_type != &VoidType){
+                ret_type = (*(LayoutType*)ret->val_type)["return"];
+            }
+            
+            LayoutType * functype = LayoutType::createFunctionalType(ret_type, args->val_type);
+            
+            val_type = functype;
+            name->val_type = functype;
+            namescope->addType(name->memval, functype);
+            
+            AstNode * body = children[3];
+            if(children.size() == 4){
+                body->setNameScope(localnamescope);
+                if(args->t == TUPLE){
+                    for(auto c : args->children){
+                        //must be typedecl, already type inferred
+                        localnamescope->addType(c->children[0]->memval, c->children[0]->val_type);
+                        
+                        
+                    }
+                } else if (args->t == TYPEDECL){
+                    localnamescope->addType(args->children[0]->memval, args->children[0]->val_type);
+                } else if (args->t != EMPTY){
+#warning TODO: semantic error
+                }
+                body->inferTypes();
+            }
+            
+        }break;
+            
+            
+        case EQUALS:
+        case NEQ:
+        case GEQ:
+        case LEQ:
+        case LESS:
+        case GREATER:
+            
+#warning TODO: check argument types for comparability
+            
+            val_type = &BoolType;
+            break;
+        case _FALSE:
+        case _TRUE:
+            val_type = &BoolType;
+            break;
+        case ASSIGN:{
+            if(children[0]->t == TUPLE){
+#warning TODO: tuple case
+            } else {
+#warning TODO: subscr case
+                children[0]->val_type = children[1]->val_type;
+                Type * hadtype = (*namescope)[children[0]->memval];
+                if(hadtype && hadtype != children[0]->val_type){
+                    throw TypeError{hadtype, val_type};
+                }
+                if(!hadtype){
+                    namescope->addType(children[0]->memval, children[0]->val_type);
+                }
+                
+            }
+        }break;
+        case SUBSCR:{
+#warning TODO: typecheck for key
+            val_type = (*(LayoutType*)children[0]->val_type)["value"];
+        }break;
+            
+        default:
+            break;
+    }
 }

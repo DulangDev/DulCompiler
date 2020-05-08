@@ -24,6 +24,7 @@ public:
         INTLIT,
         FLOATLIT,
         STRLIT,
+        ARROW,
         ASSIGN,
         PLUS,
         MINUS,
@@ -44,10 +45,10 @@ public:
         LESS,
         COLON,
         COMMA,
-        ARROW,
+        
         EOL,
         
-        
+        AS,
         KWFUN,
         KWCLASS,
         KWWRITE,
@@ -124,7 +125,7 @@ public:
         char * mem = (char*)malloc(fsize + 1);
         fread(mem, 1, fsize, f);
         mem[fsize] = 0;
-        
+        lineno = linepos = 0;
         currpos = mem;
         while(*currpos){
             currpos = scanLexem();
@@ -150,6 +151,7 @@ struct SyntaxError{
     int lineno, linepos;
     const char * message;
 };
+
 
 
 

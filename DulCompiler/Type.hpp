@@ -25,10 +25,16 @@ public:
         return is_eq;
     }
     
-    Type(const char * _name){
+    Type(const char * _name, size_t _size = 0){
         name = strdup(_name);
-        size = 0;
+        size = _size;
     }
+    
+    bool isNumeric()const{
+        return strcmp(name, "Int") == 0 || strcmp(name, "Float") == 0;
+    }
+    
+    
     ~Type(){
         free(name);
     }
@@ -38,6 +44,7 @@ public:
 
 class IterableType: public Type{
 public:
+    IterableType(const char * name, size_t s=0):Type(name, s){};
     bool operator==(IterableType& rhs)  {
         int idx = 0;
         while( operator[](idx) && rhs[idx] ){
@@ -56,6 +63,9 @@ class LayoutType: public IterableType{
     };
     std::vector<entry> layout;
 public:
+    
+    
+    LayoutType(const char * name, size_t s = 0):IterableType(name, s){};
     Type* operator[](const char *name){
         for(const auto& e: layout){
             if(strcmp(name, e.name) == 0){
@@ -80,6 +90,11 @@ public:
             size += t->size;
         }
     }
+    static LayoutType * createNamespace();
+    static LayoutType * createMap(Type * key, Type * val);
+    static LayoutType * createOption(Type * optional);
+    static LayoutType * createFunctionalType(Type * ret, Type * args);
+    static LayoutType * createTuple(std::vector<Type*>);
 };
 
 class TupleType: public IterableType{
@@ -103,6 +118,12 @@ public:
     
 };
 
+extern Type IntType;
+extern Type FloatType;
+extern Type BoolType;
+extern Type VoidType;
+extern Type StringType;
 
+bool isPrimitive(Type*);
 
 #endif /* Type_hpp */

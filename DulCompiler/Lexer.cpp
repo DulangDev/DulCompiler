@@ -9,6 +9,7 @@
 #include "Lexer.hpp"
 
 const char * Lexem::lexemText []= {
+    "->",
     "=",
     "+",
     "-",
@@ -29,10 +30,11 @@ const char * Lexem::lexemText []= {
     "<",
     ":",
     ",",
-    "->",
+    
     "\n"
 };
 const char * Lexem::kwText [] = {
+    "as",
     "fun",
     "class",
     "write",
@@ -69,8 +71,8 @@ char* LexemScanner::scanLexem(){
     for(int i = 0; i < sizeof(Lexem::lexemText)/sizeof(char*); i++){
         if(strncmp(Lexem::lexemText[i], scanpos, strlen(Lexem::lexemText[i])) == 0){
             Lexem l;
-            l.lexType = (Lexem::type)(i + Lexem::ASSIGN);
-            if(i + Lexem::ASSIGN == Lexem::EOL){
+            l.lexType = (Lexem::type)(i + Lexem::ARROW);
+            if(i + Lexem::ARROW == Lexem::EOL){
                 lineno++;
                 linepos = 0;
             }
@@ -94,10 +96,13 @@ char* LexemScanner::scanLexem(){
         linepos += len;
         currpos += len;
         for(int i = 0; i < sizeof(Lexem::kwText)/sizeof(char*); i++){
-            if(strncmp(scanpos, Lexem::kwText[i], strlen(Lexem::kwText[i])) == 0){
+            
+            
+            bool is_s_eq = nameend - scanpos == strlen(Lexem::kwText[i]);
+            if(strncmp(scanpos, Lexem::kwText[i], strlen(Lexem::kwText[i])) == 0 && is_s_eq){
                 lexems.push_back(Lexem{
                     lineno, linepos - len,
-                    (Lexem::type)(i+(int)Lexem::KWFUN),
+                    (Lexem::type)(i+(int)Lexem::AS),
                     0,
                     len
                 });
@@ -165,6 +170,7 @@ const char * Lexem::typeRepr [] = {
     "INTLIT",
     "FLOATLIT",
     "STRLIT",
+    "ARROW",
     "Assign",
     "PLUS",
     "MINUS",
@@ -185,8 +191,9 @@ const char * Lexem::typeRepr [] = {
     "LESS",
     "COLON",
     "COMMA",
-    "ARROW",
+    
     "EOL",
+    "AS",
     "KWFUN",
     "KWCLASS",
     "KWWRITE",

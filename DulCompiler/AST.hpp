@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <vector>
 #include "Lexer.hpp"
+#include "Type.hpp"
 
 class AstNode{
 public:
@@ -53,44 +54,66 @@ public:
         EMPTY,
         _TRUE,
         _FALSE,
-        INTERFACE
+        INTERFACE,
+        SUBSCR,
+        TYPECAST,
+        FUNTYPEDECL
     };
     
     
     
-private:
+protected:
     static const char * typerepr [];
     type t;
     char memval [32];
     std::vector<AstNode*> children;
     int lineno, linepos;
+    //self type as expression result
+    Type * val_type;
+    //table to lookup vars, etc
+    LayoutType * namescope;
+    LayoutType * outerscope;
 public:
+    void inferTypes();
+    void inferTypesAsObject();
+    void removeRedundant();
+    void setNameScope(LayoutType * ns){
+        namescope = ns;
+        for(int i = 0; i < children.size(); i++){
+            children[i]->setNameScope(ns);
+        }
+    }
+    
     AstNode(type _t, std::initializer_list<AstNode*> _children={}){
         t = _t;
         children = _children;
+        namescope = 0;
+        val_type = 0;
     }
     
     void add(AstNode* child){
         children.push_back(child);
     }
     
-    void print(int offt) const{
+    virtual void print(int offt, std::ostream &ostream= std::cout) const{
         for(int i = 0; i < offt; i++){
-            std::cout << " ";
+            ostream << " ";
         }
-        printf("%s ", typerepr[t] /*,lineno, linepos*/);
+        ostream << typerepr[t] << " ";
+        if(val_type)
+            ostream << "type: " <<val_type->name << " ";
         if(t == NAME || t == STRLIT){
-            printf("%s ", memval);
+            ostream << memval;
         }
         if(t == INTLIT){
-            printf("%lld", *(int64_t*)memval);
+            ostream << (*(int64_t*)memval);
         }
         if(t == FLOATLIT){
-            printf("%lf", *(double*)memval);
+             ostream << (*(double*)memval);
         }
-        std::cout<<std::endl;
+        ostream<<std::endl;
         for(const auto & c:children){
-            c->print(offt + 4);
+            c->print(offt + 4, ostream);
         }
     }
     
@@ -115,7 +138,30 @@ private:
     static AstNode* parseIf(lexIter&);
     static AstNode* parseFor(lexIter&);
     static AstNode* parseWhile(lexIter&);
+    static AstNode* parseAs(lexIter&);
     
+};
+
+struct SemanticError{
+    int lineno, linepos;
+    const char * message;
+    
+    virtual void print(std::ostream & ostream){
+        ostream << "Semantic error at "<<lineno << ":" << linepos << "\n" << message;
+    }
+};
+
+struct TypeError: public SemanticError{
+    
+    TypeError(Type * _expected, Type * _got){
+        expected = _expected;
+        got = _got;
+    }
+    
+    Type * expected, *got;
+    void print (std::ostream & ostream) override{
+        ostream << "Type error at "<<lineno<<":"<<linepos<<"\n"<< expected->name << "expected but got" << got->name;
+    }
 };
 
 #endif /* AST_hpp */

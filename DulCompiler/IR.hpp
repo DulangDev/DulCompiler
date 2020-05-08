@@ -9,22 +9,57 @@
 #ifndef IR_hpp
 #define IR_hpp
 
-#include "CFG.hpp"
+
 #include <vector>
 struct IROP{
     int lineno, linepos;
-    enum types{};
+    enum types{
+        iadd,
+        iaddlm,
+        iaddrm,
+        isub,
+        isublm,
+        isubrm,
+        imul,
+        imullm,
+        imulrm,
+        idiv,
+        idivlm,
+        idivrm,
+        istore,
+        istorelm,
+        istorerm,
+        fadd,
+        faddlm,
+        faddrm,
+        fsub,
+        fsublm,
+        fsubrm,
+        fmul,
+        fmullm,
+        fmulrm,
+        fdiv,
+        fdivlm,
+        fdivrm,
+        fstore,
+        fstorelm,
+        fstorerm,
+        iret,
+        fret,
+        iretm,
+        fretm,
+        iwrite,
+        fwrite
+        
+
+    };
     types type;
     int first_arg;
     int second_arg;
     int third_arg;
+    static const char * typerepr [];
 };
 
-class ContextedFunctionIR:public ContextedAST{
-    std::vector<IROP> ops;
-    uint8_t * static_vals;
-    int stat_size;
-    int stat_cap;
-};
+
 
 #endif /* IR_hpp */

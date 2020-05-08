@@ -45,7 +45,7 @@ public:
     }
    
     void writeIROP(IROP op);
-    void writeIRFunction(const ContextedFunctionIR*);
+    //void writeIRFunction(const ContextedFunctionIR*);
     
     ~ASMWriter(){
         free(mem);
