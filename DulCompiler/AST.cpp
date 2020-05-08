@@ -87,6 +87,11 @@ AstNode* AstNode::parseStatement(lexIter& iter){
         }
         default:{
             AstNode * lval = parseExpr(iter);
+            
+            if(lval->t == TYPEDECL || lval->t == FUNTYPEDECL){
+                return lval;
+            }
+            
             Lexem next = *iter;
             if(next.lexType != Lexem::ASSIGN){
                 throw SyntaxError{next.lineno, next.linepos, (char*)"expected ="};
@@ -214,41 +219,44 @@ AstNode* AstNode::parseUnary(lexIter& i){
 }
 AstNode* AstNode::parseSuffix(lexIter& i){
     AstNode * left = parseTopLevel(i);
-    if(i->lexType == Lexem::OP_R_BR){
-        i++;
-        AstNode * expr;
-        if(i->lexType == Lexem::CL_R_BR){
-            expr = new AstNode(EMPTY);
-        } else expr = parseExpr(i);
-        if(i->lexType != Lexem::CL_R_BR){
-            throw SyntaxError{i->lineno, i->linepos, (char*)"expected ) bracket here"};
-        }
-        i++;
-        return new AstNode(FCALL, {left, expr});
-    } else if(i->lexType == Lexem::OP_S_BR){
-        i++;
-        AstNode * expr;
-        if(i->lexType == Lexem::CL_S_BR){
-            expr = new AstNode(EMPTY);
-        } else expr = parseExpr(i);
-        if(i->lexType != Lexem::CL_S_BR){
-            throw SyntaxError{i->lineno, i->linepos, (char*)"expected ] bracket here"};
-        }
-        i++;
-        return new AstNode(SUBSCR, {left, expr});
-    } else if(i->lexType == Lexem::DOT){
-        i++;
-        AstNode * rhs = parseSuffix(i);
-        return new AstNode(AT, {left, rhs});
-    } else if(i->lexType == Lexem::COLON){
-        i++;
-        AstNode * type = parseSuffix(i);
-        return new AstNode(TYPEDECL, {left, type});
-    } else if(i->lexType == Lexem::ARROW){
-        i++;
-        AstNode * _t = parseSuffix(i);
-        return new AstNode(FUNTYPEDECL, {left, _t});
+    while(1){
+        if(i->lexType == Lexem::OP_R_BR){
+            i++;
+            AstNode * expr;
+            if(i->lexType == Lexem::CL_R_BR){
+                expr = new AstNode(EMPTY);
+            } else expr = parseExpr(i);
+            if(i->lexType != Lexem::CL_R_BR){
+                throw SyntaxError{i->lineno, i->linepos, (char*)"expected ) bracket here"};
+            }
+            i++;
+            left = new AstNode(FCALL, {left, expr});
+        } else if(i->lexType == Lexem::OP_S_BR){
+            i++;
+            AstNode * expr;
+            if(i->lexType == Lexem::CL_S_BR){
+                expr = new AstNode(EMPTY);
+            } else expr = parseExpr(i);
+            if(i->lexType != Lexem::CL_S_BR){
+                throw SyntaxError{i->lineno, i->linepos, (char*)"expected ] bracket here"};
+            }
+            i++;
+            left =  new AstNode(SUBSCR, {left, expr});
+        } else if(i->lexType == Lexem::DOT){
+            i++;
+            AstNode * rhs = parseSuffix(i);
+            left =  new AstNode(AT, {left, rhs});
+        } else if(i->lexType == Lexem::COLON){
+            i++;
+            AstNode * type = parseSuffix(i);
+            return new AstNode(TYPEDECL, {left, type});
+        } else if(i->lexType == Lexem::ARROW){
+            i++;
+            AstNode * _t = parseSuffix(i);
+            left =  new AstNode(FUNTYPEDECL, {left, _t});
+        } else return left;
     }
+    
     return left;
 }
 AstNode* AstNode::parseTopLevel(lexIter& i){
@@ -361,7 +369,6 @@ AstNode* AstNode::parseFuncDef(lexIter& i){
         //think of it as abstract fundecl
         return fundecl;
     }
-    i++;
     i++;
     AstNode * body = parseCompound(i);
     if(i->lexType != Lexem::CL_BRACE){
@@ -546,6 +553,22 @@ void AstNode::inferTypes(){
             ret = (*(LayoutType*)children[1]->val_type)["return"];
             val_type = LayoutType::createFunctionalType(ret, arg);
         }break;
+        case INTERFACE:
+        case CLASSDEF:{
+            AstNode * classname = children[0];
+            AstNode * body = children[1];
+            LayoutType * classLayout = new LayoutType(classname->memval);
+            for(auto member: body->children){
+                if(member->t != EMPTY){
+                    AstNode * member_name = member->children[0];
+                    classLayout->addType(member_name->memval, member_name->val_type);
+                }
+                
+            }
+            
+            val_type = LayoutType::createFunctionalType(classLayout, &VoidType);
+            namescope->addType(classname->memval, val_type);
+        }break;
         case MUL:
         case ADD:
         case SUB:
@@ -570,7 +593,7 @@ void AstNode::inferTypes(){
             val_type = children[0]->val_type;
             break;
         case AT:{
-            
+            val_type = (*(LayoutType*)children[0]->val_type)[children[1]->memval];
         }break;
         case NAME:{
             val_type = (*namescope)[memval];

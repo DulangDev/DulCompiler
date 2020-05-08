@@ -1,8 +1,6 @@
 fun main(args: String[], argc: ()->Int) ()->Int {
-    a = (1 * 2) + 9
-    fun b() Int{
-        a = 2.5 as ()->Int
-        return a()
+    class A{
+        x:Int
     }
-    return b
+    b = A().x
 }
