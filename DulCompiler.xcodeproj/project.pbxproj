@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9D4F054324B01D9F006EF571 /* object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D4F054124B01D9F006EF571 /* object.cpp */; };
 		9D506D79244DBFE00065BB9C /* IR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D506D77244DBFE00065BB9C /* IR.cpp */; };
 		9D506D7C244DC0DE0065BB9C /* ASM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D506D7A244DC0DE0065BB9C /* ASM.cpp */; };
 		9D8D5875244B6BCF00A8C463 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D8D5874244B6BCF00A8C463 /* main.cpp */; };
@@ -14,6 +15,7 @@
 		9D8D5880244B6C1F00A8C463 /* Type.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D8D587E244B6C1F00A8C463 /* Type.cpp */; };
 		9D8D5883244B6D7500A8C463 /* Lexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D8D5881244B6D7500A8C463 /* Lexer.cpp */; };
 		9D8D5886244B6D7E00A8C463 /* AST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D8D5884244B6D7E00A8C463 /* AST.cpp */; };
+		9DF1085224756F52002F46A9 /* bin_str.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9DF1085024756F52002F46A9 /* bin_str.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,11 +31,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9D4F054124B01D9F006EF571 /* object.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = object.cpp; sourceTree = "<group>"; };
+		9D4F054224B01D9F006EF571 /* object.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = object.hpp; sourceTree = "<group>"; };
 		9D506D77244DBFE00065BB9C /* IR.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IR.cpp; sourceTree = "<group>"; };
 		9D506D78244DBFE00065BB9C /* IR.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IR.hpp; sourceTree = "<group>"; };
 		9D506D7A244DC0DE0065BB9C /* ASM.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ASM.cpp; sourceTree = "<group>"; };
 		9D506D7B244DC0DE0065BB9C /* ASM.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ASM.hpp; sourceTree = "<group>"; };
 		9D506D7E244E3EB90065BB9C /* example.dul */ = {isa = PBXFileReference; lastKnownFileType = text; path = example.dul; sourceTree = "<group>"; };
+		9D5EDEAD24C3C56500058FE5 /* DulCompiler.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DulCompiler.entitlements; sourceTree = "<group>"; };
 		9D8D5871244B6BCF00A8C463 /* DulCompiler */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DulCompiler; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D8D5874244B6BCF00A8C463 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		9D8D587B244B6BEE00A8C463 /* Project.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Project.cpp; sourceTree = "<group>"; };
@@ -45,6 +50,9 @@
 		9D8D5884244B6D7E00A8C463 /* AST.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AST.cpp; sourceTree = "<group>"; };
 		9D8D5885244B6D7E00A8C463 /* AST.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AST.hpp; sourceTree = "<group>"; };
 		9DB0A0F42464D33100D014A7 /* main.ast */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.ast; sourceTree = "<group>"; };
+		9DF1085024756F52002F46A9 /* bin_str.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = bin_str.cpp; sourceTree = "<group>"; };
+		9DF1085124756F52002F46A9 /* bin_str.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bin_str.hpp; sourceTree = "<group>"; };
+		9DF8066924845DE700B274C0 /* main.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.ir; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +69,7 @@
 		9D506D7D244E3EA40065BB9C /* Testing */ = {
 			isa = PBXGroup;
 			children = (
+				9DF8066924845DE700B274C0 /* main.ir */,
 				9DB0A0F42464D33100D014A7 /* main.ast */,
 				9D506D7E244E3EB90065BB9C /* example.dul */,
 			);
@@ -86,6 +95,8 @@
 		9D8D5873244B6BCF00A8C463 /* DulCompiler */ = {
 			isa = PBXGroup;
 			children = (
+				9D5EDEAD24C3C56500058FE5 /* DulCompiler.entitlements */,
+				9DF1084F24756F41002F46A9 /* BuiltIn */,
 				9D506D7D244E3EA40065BB9C /* Testing */,
 				9D8D5874244B6BCF00A8C463 /* main.cpp */,
 				9D8D587B244B6BEE00A8C463 /* Project.cpp */,
@@ -102,6 +113,17 @@
 				9D506D7B244DC0DE0065BB9C /* ASM.hpp */,
 			);
 			path = DulCompiler;
+			sourceTree = "<group>";
+		};
+		9DF1084F24756F41002F46A9 /* BuiltIn */ = {
+			isa = PBXGroup;
+			children = (
+				9DF1085024756F52002F46A9 /* bin_str.cpp */,
+				9DF1085124756F52002F46A9 /* bin_str.hpp */,
+				9D4F054124B01D9F006EF571 /* object.cpp */,
+				9D4F054224B01D9F006EF571 /* object.hpp */,
+			);
+			path = BuiltIn;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -162,10 +184,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				9D506D7C244DC0DE0065BB9C /* ASM.cpp in Sources */,
+				9D4F054324B01D9F006EF571 /* object.cpp in Sources */,
 				9D8D5886244B6D7E00A8C463 /* AST.cpp in Sources */,
 				9D8D5880244B6C1F00A8C463 /* Type.cpp in Sources */,
 				9D8D5875244B6BCF00A8C463 /* main.cpp in Sources */,
 				9D8D5883244B6D7500A8C463 /* Lexer.cpp in Sources */,
+				9DF1085224756F52002F46A9 /* bin_str.cpp in Sources */,
 				9D506D79244DBFE00065BB9C /* IR.cpp in Sources */,
 				9D8D587D244B6BEE00A8C463 /* Project.cpp in Sources */,
 			);
@@ -286,6 +310,7 @@
 		9D8D5879244B6BCF00A8C463 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = DulCompiler/DulCompiler.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = WHPNX2SX7F;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -296,6 +321,7 @@
 		9D8D587A244B6BCF00A8C463 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = DulCompiler/DulCompiler.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = WHPNX2SX7F;
 				ENABLE_HARDENED_RUNTIME = YES;

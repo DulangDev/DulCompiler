@@ -1,6 +1,7 @@
-fun main(args: String[], argc: ()->Int) ()->Int {
-    class A{
-        x:Int
+fun main() {
+    a = fun ()Int{
+        b = 577
+        return b
     }
-    b = A().x
+    write a()
 }

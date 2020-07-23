@@ -14,7 +14,7 @@
 #include "Lexer.hpp"
 #include "Type.hpp"
 
-class AstNode{
+struct AstNode{
 public:
     enum type{
         RET,
@@ -62,11 +62,12 @@ public:
     
     
     
-protected:
+
     static const char * typerepr [];
     type t;
     char memval [32];
     std::vector<AstNode*> children;
+    AstNode*parent = nullptr;
     int lineno, linepos;
     //self type as expression result
     Type * val_type;
@@ -74,32 +75,57 @@ protected:
     LayoutType * namescope;
     LayoutType * outerscope;
 public:
+    void extracted();
+    
     void inferTypes();
     void inferTypesAsObject();
     void removeRedundant();
-    void setNameScope(LayoutType * ns){
+    void setNameScope(LayoutType * ns, LayoutType * outerScope){
         namescope = ns;
+        outerscope = outerScope;
+        if(t != FUNCDEF)
         for(int i = 0; i < children.size(); i++){
-            children[i]->setNameScope(ns);
+            children[i]->setNameScope(ns, outerScope);
+        }
+        else{
+            for(int i = 0; i < 4; i++){
+                children[i]->setNameScope(ns, outerScope);
+            }
         }
     }
     
     AstNode(type _t, std::initializer_list<AstNode*> _children={}){
         t = _t;
         children = _children;
+        for(auto c :children){
+            c->parent = this;
+        }
         namescope = 0;
         val_type = 0;
     }
     
     void add(AstNode* child){
         children.push_back(child);
+        if(child)
+        child->parent = this;
     }
+    
+    bool isNumLiteral() const{
+        return t == INTLIT || t == FLOATLIT;
+    }
+    
+    LayoutType * getNamescope() {
+        return namescope;
+    }
+    
+    void parseFundecl(LayoutType * os);
     
     virtual void print(int offt, std::ostream &ostream= std::cout) const{
         for(int i = 0; i < offt; i++){
             ostream << " ";
         }
-        ostream << typerepr[t] << " ";
+        ostream << typerepr[t] << " " << std::hex << (long)this << std::dec << " ";
+    
         if(val_type)
             ostream << "type: " <<val_type->name << " ";
         if(t == NAME || t == STRLIT){
@@ -112,8 +138,21 @@ public:
              ostream << (*(double*)memval);
         }
         ostream<<std::endl;
+        if(t != FUNCDEF)
         for(const auto & c:children){
             c->print(offt + 4, ostream);
+        }
+        else{
+            for(int i = 0; i < 4; i++)
+                children[i]->print(offt + 4, ostream);
+            for(int i = 0; i < offt+4; i++){
+                ostream << " ";
+            }
+            ostream << "Functional parent: " <<std::hex <<(long)children[4] << std::dec << std::endl;
+            for(int i = 0; i < offt+4; i++){
+                ostream << " ";
+            } ostream << "closures:" << std::endl;
+            children[5]->print(offt+8, ostream);
         }
     }
     
@@ -163,5 +202,6 @@ struct TypeError: public SemanticError{
         ostream << "Type error at "<<lineno<<":"<<linepos<<"\n"<< expected->name << "expected but got" << got->name;
     }
 };
+void setFunctionParenthesisDownwalk(AstNode* node, AstNode * f = 0);
 
 #endif /* AST_hpp */

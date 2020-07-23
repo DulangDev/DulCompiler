@@ -10,10 +10,9 @@
 #include <string>
 Type IntType("Int", 8);
 Type FloatType("Float", 8);
-Type BoolType("Bool", 1);
-Type VoidType("Void", 0);
-#warning TODO: replace this number with actual string size
-Type StringType("String", 32);
+Type BoolType("Bool", 8);
+Type VoidType("Void", 8);
+Type StringType("String", 8);
 
 LayoutType * LayoutType::createNamespace(){
     LayoutType * layout = new LayoutType("namespace");
@@ -71,5 +70,9 @@ LayoutType* LayoutType::createFunctionalType(Type *ret, Type *args){
     LayoutType * func = new LayoutType(("fun(" + std::string(args->name) + ")->" + ret->name).c_str());
     func->addType("return", ret);
     func->addType("args", args);
+    func->size = 8;
     return func;
 }
+
+Type ObjectType("object", 8);
+Type * undefined = 0;

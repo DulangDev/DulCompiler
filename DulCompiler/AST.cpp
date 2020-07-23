@@ -11,7 +11,6 @@
 
 AstNode* AstNode::parseFile(const char * name){
     LexemScanner scanner(name);
-    scanner.print();
     lexIter iter = scanner.getIterator();
     try{
         return parseCompound(iter);
@@ -21,6 +20,30 @@ AstNode* AstNode::parseFile(const char * name){
     }
 }
 
+
+
+void setFunctionParenthesisDownwalk(AstNode* node, AstNode * f){
+    if(node->t == AstNode::FUNCDEF){
+        node->add(f);
+        node->add(new AstNode(AstNode::TUPLE, {}));
+        f = node;
+        setFunctionParenthesisDownwalk(node->children[3], f);
+        return;
+    }
+    if(node->children.size())
+    for(auto c: node->children){
+        if(c)
+        setFunctionParenthesisDownwalk(c, f);
+    }
+}
+
+Type*& recursive_clos_lookup(AstNode * node, const char * name){
+    return undefined;
+}
+
+Type*& clos_lookup(AstNode * node, const char * name){
+    return undefined;
+}
 
 
 
@@ -91,13 +114,21 @@ AstNode* AstNode::parseStatement(lexIter& iter){
             if(lval->t == TYPEDECL || lval->t == FUNTYPEDECL){
                 return lval;
             }
+            if(lval->t == FCALL){
+                return lval;
+            }
             
             Lexem next = *iter;
             if(next.lexType != Lexem::ASSIGN){
                 throw SyntaxError{next.lineno, next.linepos, (char*)"expected ="};
             }
             iter++;
-            AstNode* rval = parseExpr(iter);
+            AstNode* rval;
+            if(iter->lexType == Lexem::KWFUN){
+                iter++;
+                rval = parseFuncDef(iter);
+            } else
+            rval = parseExpr(iter);
             iter++;
             return new AstNode(ASSIGN, {lval, rval});
         }break;
@@ -501,7 +532,46 @@ AstNode* AstNode::parseWhile(lexIter&i){
 }
 
 
+void AstNode::parseFundecl(LayoutType * os) {
+    LayoutType * localnamescope = LayoutType::createNamespace();
+    AstNode * name = children[0];
+    AstNode * args = children[1];
+    AstNode * ret = children[2];
+    
+    ret->inferTypes();
+    
+    Type * ret_type  = &VoidType;
+    if(ret->val_type != &VoidType){
+        ret_type = (*(LayoutType*)ret->val_type)["return"];
+    }
+    
+    LayoutType * functype = LayoutType::createFunctionalType(ret_type, args->val_type);
+    
+    val_type = functype;
+    name->val_type = functype;
+    namescope->addType(name->memval, functype);
+    
+    AstNode * body = children[3];
+    if(children.size() >= 4){
+        body->setNameScope(localnamescope, os);
+        if(args->t == TUPLE){
+            for(auto c : args->children){
+                //must be typedecl, already type inferred
+                localnamescope->addType(c->children[0]->memval, c->children[0]->val_type);
+                
+                
+            }
+        } else if (args->t == TYPEDECL){
+            localnamescope->addType(args->children[0]->memval, args->children[0]->val_type);
+        } else if (args->t != EMPTY){
+#warning TODO: semantic error
+        }
+        body->inferTypes();
+    }
+}
+
 void AstNode::inferTypes(){
+    
     if(namescope == nullptr){
         throw "cannot infer types without context";
     }
@@ -510,6 +580,9 @@ void AstNode::inferTypes(){
     for(int i = 0; i < children.size(); i++){
         children[i]->inferTypes();
     } else children[1]->inferTypes();
+    if(t == FUNCDEF){
+        //children[3]->inferTypes();
+    }
     switch (t) {
         case EMPTY:
             val_type = &VoidType;
@@ -536,7 +609,7 @@ void AstNode::inferTypes(){
             val_type = (*(LayoutType*)children[0]->val_type)["return"];
         }break;
         case FUNTYPEDECL:{
-            Type * arg, *ret;
+            Type * arg=0, *ret;
             if(children[0]->t == TUPLE){
                 std::vector<Type*> types;
                 for(auto c: children[0]->children){
@@ -559,9 +632,14 @@ void AstNode::inferTypes(){
             AstNode * body = children[1];
             LayoutType * classLayout = new LayoutType(classname->memval);
             for(auto member: body->children){
-                if(member->t != EMPTY){
+                if(member->t == TYPEDECL || member->t == FUNTYPEDECL){
+                    
+                    
                     AstNode * member_name = member->children[0];
                     classLayout->addType(member_name->memval, member_name->val_type);
+                }
+                if(member->t == FUNCDEF){
+#warning TODO method decls
                 }
                 
             }
@@ -580,6 +658,21 @@ void AstNode::inferTypes(){
             } else if( lhs->val_type->isNumeric() && rhs->val_type->isNumeric() ){
                 //both are numeric but not both are integer
                 val_type = &FloatType;
+                AstNode * fltype = new AstNode(NAME);
+                fltype->setNameScope(namescope, outerscope);
+                fltype->val_type = &FloatType;
+                
+                
+                
+                if(lhs->val_type == &IntType){
+                    children[0] = new AstNode(TYPECAST, {lhs, fltype});
+                    children[0]->val_type = &FloatType;
+                }
+                if(rhs->val_type == &IntType){
+                    children[1] = new AstNode(TYPECAST, {rhs, fltype});
+                    children[1]->val_type = &FloatType;
+                }
+                
             }
             if(lhs->val_type == &StringType && rhs->val_type == &StringType && t == ADD){
                 val_type = &StringType;
@@ -597,6 +690,17 @@ void AstNode::inferTypes(){
         }break;
         case NAME:{
             val_type = (*namescope)[memval];
+            if(!val_type){
+                AstNode * walker = this;
+                while(walker && walker->t != FUNCDEF){
+                    walker = walker->parent;
+                }
+                
+                
+                
+                
+                walker;
+            }
         }break;
         case TYPEDECL:{
             AstNode * rhs = children[1];
@@ -628,41 +732,7 @@ void AstNode::inferTypes(){
         }break;
             
         case FUNCDEF:{
-            LayoutType * localnamescope = LayoutType::createNamespace();
-            AstNode * name = children[0];
-            AstNode * args = children[1];
-            AstNode * ret = children[2];
-            
-            ret->inferTypes();
-            
-            Type * ret_type  = &VoidType;
-            if(ret->val_type != &VoidType){
-                ret_type = (*(LayoutType*)ret->val_type)["return"];
-            }
-            
-            LayoutType * functype = LayoutType::createFunctionalType(ret_type, args->val_type);
-            
-            val_type = functype;
-            name->val_type = functype;
-            namescope->addType(name->memval, functype);
-            
-            AstNode * body = children[3];
-            if(children.size() == 4){
-                body->setNameScope(localnamescope);
-                if(args->t == TUPLE){
-                    for(auto c : args->children){
-                        //must be typedecl, already type inferred
-                        localnamescope->addType(c->children[0]->memval, c->children[0]->val_type);
-                        
-                        
-                    }
-                } else if (args->t == TYPEDECL){
-                    localnamescope->addType(args->children[0]->memval, args->children[0]->val_type);
-                } else if (args->t != EMPTY){
-#warning TODO: semantic error
-                }
-                body->inferTypes();
-            }
+            parseFundecl(outerscope);
             
         }break;
             
@@ -705,5 +775,86 @@ void AstNode::inferTypes(){
             
         default:
             break;
+    }
+}
+
+template<typename T>
+T performStatic(T lhs, T rhs, AstNode::type t){
+    switch (t) {
+        case AstNode::ADD:
+            return lhs + rhs;
+            break;
+        case AstNode::SUB:
+            return lhs - rhs;
+            break;
+        case AstNode::MUL:
+            return lhs * rhs;
+            break;
+        case AstNode::DIV:
+            return lhs / rhs;
+            break;
+        default:
+            return T();
+            break;
+    }
+}
+
+
+void AstNode::removeRedundant(){
+    for(auto c: children){
+        c->removeRedundant();
+    }
+    if(t == TYPECAST && children[0]->isNumLiteral()){
+        if(val_type == &FloatType){
+            double val;
+            if(children[0]->t == INTLIT){
+                val = *(int64_t*)children[0]->memval;
+            } else {
+                val = *(double*)children[0]->memval;
+            }
+            memcpy(memval, &val, 8);
+            t = FLOATLIT;
+        }
+        if(val_type == &IntType){
+            int64_t val;
+            if(children[0]->t == INTLIT){
+                val = *(int64_t*)children[0]->memval;
+            } else {
+                val = *(double*)children[0]->memval;
+            }
+            memcpy(memval, &val, 8);
+            t = INTLIT;
+        }
+        children.clear();
+    }
+    if((t == ADD || t == SUB || t == MUL || t == DIV) && children[0]->isNumLiteral() && children[1]->isNumLiteral()){
+        // as they are properly type casted, we can just perform the operation
+        if(val_type == &IntType){
+            int64_t lhs = *(int64_t*)children[0]->memval, rhs= *(int64_t*)children[1]->memval;
+            *(int64_t*)memval = performStatic(lhs, rhs, t);
+            t = INTLIT;
+        } else{
+            double lhs = *(double*)children[0]->memval, rhs= *(double*)children[1]->memval;
+            *(double*)memval = performStatic(lhs, rhs, t);
+            t = FLOATLIT;
+        }
+        children.clear();
+        
+    }
+}
+
+void AstNode::inferTypesAsObject(){
+    val_type = &ObjectType;
+    if(t == FLOATLIT)
+        val_type = &FloatType;
+    if(t == INTLIT)
+        val_type = &IntType;
+    if(t == NAME){
+        if(namescope->indexOf(memval) == -1){
+            namescope->addType(memval, &ObjectType);
+        }
+    }
+    for(auto c: children){
+        c->inferTypesAsObject();
     }
 }

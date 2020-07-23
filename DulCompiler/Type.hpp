@@ -56,23 +56,30 @@ public:
     }
 };
 
+extern Type * undefined;
+
 class LayoutType: public IterableType{
+public:
     struct entry{
         const char * name;
         Type * t;
     };
+private:
     std::vector<entry> layout;
 public:
     
+    int length()const{
+        return (int)layout.size();
+    }
     
     LayoutType(const char * name, size_t s = 0):IterableType(name, s){};
-    Type* operator[](const char *name){
+    Type*& operator[](const char *name){
         for(const auto& e: layout){
             if(strcmp(name, e.name) == 0){
-                return e.t;
+                return const_cast<Type*&>(e.t);
             }
         }
-        return nullptr;
+        return undefined;
     }
     Type* operator[](int idx) override{
         if(idx >= layout.size() or idx < 0){
@@ -81,6 +88,24 @@ public:
         return layout[idx].t;
     }
     
+    entry getEntry(int idx){
+        return layout[idx];
+    }
+    
+    int indexOf(const char * name){
+        int curridx = 0;
+        for(const auto& e: layout){
+            if(strcmp(name, e.name) == 0){
+                return curridx;
+            }
+            curridx += e.t->size;
+        }
+        return -1;
+    }
+    
+    LayoutType(const LayoutType & rhs):IterableType(rhs.name, rhs.size){
+        
+    }
     
     
     virtual void addType(const char * n, Type * t){
@@ -123,6 +148,7 @@ extern Type FloatType;
 extern Type BoolType;
 extern Type VoidType;
 extern Type StringType;
+extern Type ObjectType;
 
 bool isPrimitive(Type*);
 

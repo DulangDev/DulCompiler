@@ -152,6 +152,13 @@ struct SyntaxError{
     const char * message;
 };
 
+struct Error{
+    int lineno, linepos;
+    const char * message;
+};
+
+
+
 
 
 

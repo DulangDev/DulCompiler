@@ -1,0 +1,12 @@
+var Int of type fun()->Int
+var Float of type fun()->Float
+var Bool of type fun()->Bool
+var String of type fun()->String
+var Void of type fun()->Void
+var  of type fun(Void)->Int
+var a of type fun(Void)->Int
+code: --------
+vpush 0 96 0
+namestore 88 96 0
+call 96 112 88
+iwrite 96 0 0
