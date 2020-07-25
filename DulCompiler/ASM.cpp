@@ -84,7 +84,7 @@ void ASMWriter::writeIROP(IROP op){
             writeMem(R10ToStack(&op.dest));
         }break;
         case IROP::fcall:{
-#warning TODO: args
+
             int framesize = op.farg;
             int dest = op.dest;
             int place = op.sarg;
@@ -139,6 +139,7 @@ void ASMWriter::writeIROP(IROP op){
             writeMem(CallRax);
             writeMem(RaxToStack(&op.dest));
         }break;
+        
         default:
             break;
     }

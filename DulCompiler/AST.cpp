@@ -131,7 +131,7 @@ AstNode* AstNode::parseStatement(lexIter& iter){
             rval = parseExpr(iter);
             if(next.lexType != Lexem::ASSIGN && !(rval->t == FCALL && lval->t == AT)){
                 throw SyntaxError{next.lineno, next.linepos, (char*)"expected ="};
-            }
+            } 
             iter++;
             return new AstNode(ASSIGN, {lval, rval});
         }break;
@@ -264,7 +264,23 @@ AstNode* AstNode::parseSuffix(lexIter& i){
                 throw SyntaxError{i->lineno, i->linepos, (char*)"expected ) bracket here"};
             }
             i++;
-            left = new AstNode(FCALL, {left, expr});
+            if(expr->t != TUPLE){
+				AstNode * l_a = expr;
+				expr = new AstNode(TUPLE);
+				if(l_a->t != EMPTY){
+					expr->add(l_a);
+				}
+			}
+            if(left->t == AT){
+				std::vector<AstNode*> expanded_args;
+				expanded_args.push_back(left->children[0]);
+				for(auto arg: expr->children){
+					expanded_args.push_back(arg);
+				}
+				 left = new AstNode(FCALL, {left, expr});
+			}
+            
+           
         } else if(i->lexType == Lexem::OP_S_BR){
             i++;
             AstNode * expr;
@@ -276,7 +292,7 @@ AstNode* AstNode::parseSuffix(lexIter& i){
             }
             i++;
             left =  new AstNode(SUBSCR, {left, expr});
-        } else if(i->lexType == Lexem::DOT){
+        } else if(0){
             i++;
             AstNode * rhs = parseSuffix(i);
             left =  new AstNode(AT, {left, rhs});
@@ -294,10 +310,10 @@ AstNode* AstNode::parseSuffix(lexIter& i){
     return left;
 }
 AstNode* AstNode::parseTopLevel(lexIter& i){
+	AstNode * expr;
     switch (i->lexType) {
         case Lexem::OP_R_BR:{
             i++;
-            AstNode * expr;
             if(i->lexType == Lexem::CL_R_BR){
                 expr = new AstNode(EMPTY);
                 i++;
@@ -307,48 +323,45 @@ AstNode* AstNode::parseTopLevel(lexIter& i){
             }
                 i++;
             }
-            return expr;
         }break;
         case Lexem::NAME:{
-            
-            AstNode * name = new AstNode(NAME);
-            strcpy(name->memval, i->val.strval);
+            expr = new AstNode(NAME);
+            strcpy(expr->memval, i->val.strval);
             i++;
-            return name;
         }break;
         case Lexem::INTLIT:{
-            
-            AstNode * intlit = new AstNode(INTLIT);
-            memcpy(intlit->memval, &i->val.ival, sizeof(int64_t));
+            expr = new AstNode(INTLIT);
+            memcpy(expr->memval, &i->val.ival, sizeof(int64_t));
             i++;
-            return intlit;
         }break;
         case Lexem::FLOATLIT:{
-
-            AstNode * intlit = new AstNode(FLOATLIT);
-            memcpy(&intlit->memval, &i->val.fval, sizeof(double));
+            expr = new AstNode(FLOATLIT);
+            memcpy(expr->memval, &i->val.fval, sizeof(double));
             i++;
-            return intlit;
         }break;
         case Lexem::STRLIT:{
-      
-            AstNode * intlit = new AstNode(STRLIT);
-            memcpy(&intlit->memval, &i->val.strval, sizeof(char*));
+            expr  = new AstNode(STRLIT);
+            memcpy(&expr->memval, &i->val.strval, sizeof(char*));
             i++;
-            return intlit;
         }break;
         case Lexem::KWTRUE:{
             i++;
-            return new AstNode(_TRUE);
+            expr =  new AstNode(_TRUE);
         }break;
         case Lexem::KWFALSE:{
             i++;
-            return new AstNode(_FALSE);
+            expr =  new AstNode(_FALSE);
         }break;
         default:
             throw SyntaxError{i->lineno, i->linepos, (char*)"top level expection expected"};
             break;
     }
+    if(i->lexType == Lexem::DOT){
+		i++;
+		AstNode * rhs = parseTopLevel(i);
+		expr = new AstNode(AT, {expr, rhs});
+	}
+    return expr;
 }
 AstNode* AstNode::parseClassDef(lexIter& i){
     AstNode * classdef = new AstNode(CLASSDEF);
@@ -539,6 +552,11 @@ void AstNode::parseMethodDecl(Type * this_type){
     AstNode * this_arg = new AstNode(NAME);
     memcpy(this_arg->memval, "this", 5);
     this_arg->val_type = this_type;
+    AstNode * this_name = new AstNode(NAME);
+    this_name->val_type = this_type;
+    strcpy(this_name->memval, this_type->name);
+    AstNode * this_arg_wrapper = new AstNode(TYPEDECL, {this_arg, this_name});
+    this_arg_wrapper->val_type = this_type;
     
     if(children[1]->t == TYPEDECL){
         //only one arg
@@ -554,7 +572,7 @@ void AstNode::parseMethodDecl(Type * this_type){
         children[1]->inferTypes();
     } else {
         //null args
-        children[1] = this_arg;
+        children[1] = this_arg_wrapper;
     }
     
     parseFundecl(0);
@@ -785,9 +803,19 @@ void AstNode::inferTypes(){
             break;
         case AT:{
             LayoutType * parental_type = (LayoutType*)children[0]->val_type;
+			if(parental_type == nullptr){
+				throw SyntaxError{0, 0, "parental type at subscr is NULL"};
+			}
             const char * member_name = children[1]->memval;
             val_type = (*parental_type)[member_name];
-            
+            if(!val_type){
+				LayoutType * vtable = (LayoutType*)(*parental_type)["vtable"];
+				if(!vtable){
+						
+				} else {
+					val_type = (*vtable)[member_name];
+				}
+			}
             
         }break;
         case NAME:{

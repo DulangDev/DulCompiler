@@ -1,56 +1,64 @@
-FUNCDEF 100553d80 type: fun(Void)->Void 
-    NAME 100553e60 type: fun(Void)->Void main
-    NOP 100553ed0 type: Void 
-    NOP 100553c50 type: Void 
-    BLOCK 100553f40 
-        NOP 100553fb0 type: Void 
-        CLASSDEF 100554020 type: fun(Void)->A 
-            NAME 100554090 A
-            BLOCK 100554100 
-                NOP 100554170 
-                TYPEDECL 1005542c0 
-                    NAME 1005541e0 type: Int a
-                    NAME 100554250 Int
-                NOP 100554330 
-                TYPEDECL 100554480 
-                    NAME 1005543a0 type: Int b
-                    NAME 100554410 Int
-                NOP 1005544f0 
-                FUNCDEF 100554560 type: fun(A)->Void 
-                    NAME 100554640 type: fun(A)->Void f
-                    NAME 100550e00 type: A this
-                    NOP 100554720 type: Void 
-                    BLOCK 100554790 
-                        NOP 100554800 type: Void 
-                        WRITE 1005548e0 type: Int 
-                            INTLIT 100554870 type: Int 3
-                        RET 1005549c0 type: Int 
-                            INTLIT 100554950 type: Int 12
-                    Functional parent: 100553d80
+FUNCDEF 1038bdc90 type: fun(Void)->Void 
+    NAME 1038bdd70 type: fun(Void)->Void main
+    NOP 1038bdde0 type: Void 
+    NOP 1038070f0 type: Void 
+    BLOCK 1038bde70 
+        NOP 1038bdee0 type: Void 
+        CLASSDEF 1038bdf50 type: fun(Void)->A 
+            NAME 1038bdfc0 A
+            BLOCK 1038be030 
+                NOP 1038be0a0 
+                FUNCDEF 1038be110 type: fun(A)->Void 
+                    NAME 1038be1f0 type: fun(A)->Void f
+                    TYPEDECL 100504920 type: A 
+                        NAME 1005047a0 type: A this
+                        NAME 1005048b0 type: A A
+                    NOP 1038be2d0 type: Void 
+                    BLOCK 1038be360 
+                        NOP 1038be3d0 type: Void 
+                        RET 1038be4b0 type: Int 
+                            INTLIT 1038be440 type: Int 5
+                    Functional parent: 1038bdc90
                     closures:
-                        TUPLE 100550530 
-                NOP 100554a50 
-        NOP 100554ac0 type: Void 
-        ASSIGN 100554d10 
-            NAME 100554b50 type: A b
-            FCALL 100554ca0 type: A 
-                NAME 100554bc0 type: fun(Void)->A A
-                NOP 100554c30 type: Void 
-        ASSIGN 100554f40 
-            AT 100554e60 type: Int 
-                NAME 100554d80 type: A b
-                NAME 100554df0 a
-            INTLIT 100554ed0 type: Int 7
-        WRITE 100555140 type: Int 
-            AT 1005550d0 type: Int 
-                NAME 100554ff0 type: A b
-                NAME 100555060 a
-        WRITE 100550050 
-            AT 10054ffe0 
-                NAME 10054fe20 type: A b
-                FCALL 10054ff70 type: Void 
-                    NAME 10054fe90 type: fun(A)->Void f
-                    NOP 10054ff00 type: Void 
+                        TUPLE 1038ba4b0 
+                NOP 1038be520 
+                TYPEDECL 1038be690 
+                    NAME 1038be5b0 type: Int g
+                    NAME 1038be620 Int
+                NOP 1038be700 
+                FUNCDEF 1038be7b0 type: fun(A)->Void 
+                    NAME 1038be890 type: fun(A)->Void init
+                    TYPEDECL 100504e70 type: A 
+                        NAME 100504d80 type: A this
+                        NAME 100504e00 type: A A
+                    NOP 1038be970 type: Void 
+                    BLOCK 1038be9e0 
+                        NOP 1038bea50 type: Void 
+                        ASSIGN 1038bec80 
+                            AT 1038beba0 type: Int 
+                                NAME 1038beac0 type: A this
+                                NAME 1038beb30 g
+                            INTLIT 1038bec10 type: Int 6
+                    Functional parent: 1038bdc90
+                    closures:
+                        TUPLE 1038ba560 
+                NOP 1038becf0 
+        NOP 1038bed60 type: Void 
+        ASSIGN 1038befb0 
+            NAME 1038bedf0 type: A c
+            FCALL 1038bef40 type: A 
+                NAME 1038bee60 type: fun(Void)->A A
+                NOP 1038beed0 type: Void 
+        FCALL 1038bf1e0 type: Void 
+            AT 1038bf100 type: fun(A)->Void 
+                NAME 1038bf020 type: A c
+                NAME 1038bf090 type: fun(A)->Void init
+            NOP 1038bf170 type: Void 
+        NOP 1038bf290 type: Void 
+        WRITE 1038ba0a0 type: Int 
+            AT 1038ba030 type: Int 
+                NAME 1038bf300 type: A c
+                NAME 1038b9fc0 g
     Functional parent: 0
     closures:
-        TUPLE 100550480 
+        TUPLE 1038ba400 

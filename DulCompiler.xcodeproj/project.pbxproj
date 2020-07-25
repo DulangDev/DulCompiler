@@ -318,7 +318,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = DulCompiler/DulCompiler.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = WHPNX2SX7F;
+				DEVELOPMENT_TEAM = VE99M53YZ4;
 				ENABLE_HARDENED_RUNTIME = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -329,7 +329,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = DulCompiler/DulCompiler.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = WHPNX2SX7F;
+				DEVELOPMENT_TEAM = VE99M53YZ4;
 				ENABLE_HARDENED_RUNTIME = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

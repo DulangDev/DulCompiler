@@ -45,6 +45,7 @@ void IRFunction::writeBlock(AstNode *block){
 }
 
 
+
 #warning TODO: GC!!!!!
 struct ObjectCreator;
 IRFunction::StatVal constructor (void*, void**);
@@ -221,17 +222,29 @@ int IRFunction::destOutASTLoad(AstNode *root, int dest){
             return dest;
         }break;
         case AstNode::FCALL:{
-            int fplace = destOutASTLoad(root->children[0], -1);
-            int argplace = destOutASTLoad(root->children[1], -1);
-            if(dest == -1){
-                dest = currstackpos;
-                currstackpos+=8;
-            }
-            operands.push_back(IROP{0, 0, IROP::fcall, dest, argplace, fplace});
+            
+            if(root->children[0]->t == AstNode::AT){
+				// method
+				
+				#warning TODO: method call this pass into AST
+				
+				
+				
+			} else {
+				int fplace = destOutASTLoad(root->children[0], -1);
+				int argplace = destOutASTLoad(root->children[1], -1);
+				if(dest == -1){
+					dest = currstackpos;
+					currstackpos+=8;
+				}
+				operands.push_back(IROP{0, 0, IROP::fcall, dest, argplace, fplace});
+			}
+            
+            
             return dest;
         }break;
         case AstNode::CLASSDEF:{
-            size_t classSize = ((LayoutType*)((*(LayoutType*)root->val_type)["return"]))->size;
+            size_t classSize = ((LayoutType*)((*(LayoutType*)root->val_type)["return"]))->length()*8;
             StatVal classConstructor;
             vals.push_back(classConstructor);
             
@@ -254,7 +267,7 @@ int IRFunction::destOutASTLoad(AstNode *root, int dest){
             }
             AstNode * rhs = root->children[1];
             AstNode * lhs = root->children[0];
-            if(rhs->t == AstNode::FCALL){
+            if(0){
                 //method call
                 AstNode * method_name = rhs->children[0];
                 AstNode * args = rhs->children[1];
