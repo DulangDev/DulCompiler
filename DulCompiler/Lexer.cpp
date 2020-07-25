@@ -118,6 +118,9 @@ char* LexemScanner::scanLexem(){
             .textlength = len
         });
     }
+#ifndef isnumber
+#define isnumber isdigit
+#endif
     if(isnumber(*scanpos)){
         char * endnum;
         double val = strtod(scanpos, &endnum);
