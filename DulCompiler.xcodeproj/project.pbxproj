@@ -10,6 +10,7 @@
 		9D4F054324B01D9F006EF571 /* object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D4F054124B01D9F006EF571 /* object.cpp */; };
 		9D506D79244DBFE00065BB9C /* IR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D506D77244DBFE00065BB9C /* IR.cpp */; };
 		9D506D7C244DC0DE0065BB9C /* ASM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D506D7A244DC0DE0065BB9C /* ASM.cpp */; };
+		9D62F5B924CBC58600DB1486 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 9D62F5B824CBC58600DB1486 /* Makefile */; };
 		9D8D5875244B6BCF00A8C463 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D8D5874244B6BCF00A8C463 /* main.cpp */; };
 		9D8D587D244B6BEE00A8C463 /* Project.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D8D587B244B6BEE00A8C463 /* Project.cpp */; };
 		9D8D5880244B6C1F00A8C463 /* Type.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D8D587E244B6C1F00A8C463 /* Type.cpp */; };
@@ -40,6 +41,7 @@
 		9D506D7E244E3EB90065BB9C /* example.dul */ = {isa = PBXFileReference; lastKnownFileType = text; path = example.dul; sourceTree = "<group>"; };
 		9D5EDEAD24C3C56500058FE5 /* DulCompiler.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DulCompiler.entitlements; sourceTree = "<group>"; };
 		9D62F5B724CA307800DB1486 /* ex.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ex.ir; sourceTree = "<group>"; };
+		9D62F5B824CBC58600DB1486 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; usesTabs = 1; };
 		9D8D5871244B6BCF00A8C463 /* DulCompiler */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DulCompiler; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D8D5874244B6BCF00A8C463 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		9D8D587B244B6BEE00A8C463 /* Project.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Project.cpp; sourceTree = "<group>"; };
@@ -113,6 +115,7 @@
 				9D506D78244DBFE00065BB9C /* IR.hpp */,
 				9D506D7A244DC0DE0065BB9C /* ASM.cpp */,
 				9D506D7B244DC0DE0065BB9C /* ASM.hpp */,
+				9D62F5B824CBC58600DB1486 /* Makefile */,
 			);
 			path = DulCompiler;
 			sourceTree = "<group>";
@@ -185,6 +188,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9D62F5B924CBC58600DB1486 /* Makefile in Sources */,
 				9D506D7C244DC0DE0065BB9C /* ASM.cpp in Sources */,
 				9D4F054324B01D9F006EF571 /* object.cpp in Sources */,
 				9D8D5886244B6D7E00A8C463 /* AST.cpp in Sources */,

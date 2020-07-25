@@ -10,6 +10,5 @@ fun main() {
     b = A()
     b.a = 7
     write b.a
-    b.vtable = 0
     write b.f()
 }

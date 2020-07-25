@@ -9,8 +9,6 @@ vpush 8 32 0
 set_member 16 8 32
 at 32 8 16
 iwrite 32 0 0
-vpush 16 32 0
-set_member 16 0 32
 namestore 40 16 0
 method_cal 32 0 40
 iwrite 32 0 0
