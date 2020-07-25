@@ -17,6 +17,7 @@
 
 #include <stdio.h>
 #include "IR.hpp"
+#include <assert.h>
 
 
 class ASMWriter{
