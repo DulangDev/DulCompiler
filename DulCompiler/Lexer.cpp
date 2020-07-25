@@ -7,6 +7,7 @@
 //
 
 #include "Lexer.hpp"
+#include <ctype.h>
 
 const char * Lexem::lexemText []= {
     "->",

@@ -8,6 +8,7 @@
 
 #include "ASM.hpp"
 #include <sys/mman.h>
+#include <assert.h>
 
 
 uint8_t inc_stack [] = {};
@@ -40,7 +41,9 @@ ASMWriter::MemFactory::GeneratedMem printTempregister(uint8_t Rno){
     ASMWriter::MemFactory RegToRDI({ 0x4C, 0x89, 0xD7 }, 2, 1);
     return RegToRDI(&Rno) + MovAbsToRax.produceFunPtr(&write_int) + CallRax;
 }
-
+#ifndef MAP_JIT
+#define MAP_JIT 0
+#endif
 ASMWriter::compiledFunc ASMWriter::generate() const {
     void * _mem = mmap(0, memsize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON | MAP_JIT, -1, 0);
     memcpy(_mem, mem, memsize);
