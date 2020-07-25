@@ -1,7 +1,15 @@
 fun main() {
-    a = fun ()Int{
-        b = 577
-        return b
+    class A{
+        a:Int
+        b:Int
+        fun f(){
+            write 3
+            return 12
+        }
     }
-    write a()
+    b = A()
+    b.a = 7
+    write b.a
+    b.vtable = 0
+    write b.f()
 }

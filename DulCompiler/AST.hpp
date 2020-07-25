@@ -119,6 +119,8 @@ public:
     }
     
     void parseFundecl(LayoutType * os);
+    void inferClassDeclTypes();
+    void parseMethodDecl(Type * this_type);
     
     virtual void print(int offt, std::ostream &ostream= std::cout) const{
         for(int i = 0; i < offt; i++){
@@ -152,6 +154,7 @@ public:
             for(int i = 0; i < offt+4; i++){
                 ostream << " ";
             } ostream << "closures:" << std::endl;
+            if(children.size() > 3)
             children[5]->print(offt+8, ostream);
         }
     }

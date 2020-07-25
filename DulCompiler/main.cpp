@@ -14,15 +14,15 @@
 
 int main(int argc, const char * argv[]) {
     // insert code here...
-    AstNode * p = AstNode::parseFile("example.dul");
+    AstNode * p = AstNode::parseFile("example.dul")->children[0];
     LayoutType * namescope =LayoutType::createNamespace();
     p->setNameScope(namescope, namescope);
-    setFunctionParenthesisDownwalk(p->children[0]);
+    setFunctionParenthesisDownwalk(p);
     p->inferTypes();
     //p->removeRedundant();
     std::ofstream a("main.ast");
     p->print(0, a);
-    IRFunction f(p->children[0]->children[3]);
+    IRFunction f(p->children[3]);
     f.print("main.ir");
     ASMWriter writer;
     writer.writeIRFunction(&f);

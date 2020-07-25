@@ -20,24 +20,7 @@ protected:
     
 };
 
-class number: public object{
-    double val;
-public:
-    number * add(number * rhs){
-        return new number(val + rhs->val);
-    }
-    number(double v){
-        type = &FloatType;
-        refcount = 0;
-        this->val = v;
-    }
-    number(int64_t val){
-        type = &FloatType;
-        refcount = 0;
-        this->val = val;
-    }
-    
-};
+
 
 
 #endif /* object_hpp */

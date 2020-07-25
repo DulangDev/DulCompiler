@@ -30,7 +30,11 @@ struct IROP{
         itof,
         namestore,
         ret,
-        fcall
+        fcall,
+        at,
+        set_member,
+        method_call,
+        umin
         
 
     };
@@ -80,5 +84,5 @@ struct IRFunction{
 };
 
 
-
+typedef IRFunction::StatVal(*SuperCaller)(void*, void**);
 #endif /* IR_hpp */

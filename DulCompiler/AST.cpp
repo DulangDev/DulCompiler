@@ -119,7 +119,7 @@ AstNode* AstNode::parseStatement(lexIter& iter){
             }
             
             Lexem next = *iter;
-            if(next.lexType != Lexem::ASSIGN){
+            if(next.lexType != Lexem::ASSIGN && lval->t != AT){
                 throw SyntaxError{next.lineno, next.linepos, (char*)"expected ="};
             }
             iter++;
@@ -129,6 +129,9 @@ AstNode* AstNode::parseStatement(lexIter& iter){
                 rval = parseFuncDef(iter);
             } else
             rval = parseExpr(iter);
+            if(next.lexType != Lexem::ASSIGN && !(rval->t == FCALL && lval->t == AT)){
+                throw SyntaxError{next.lineno, next.linepos, (char*)"expected ="};
+            }
             iter++;
             return new AstNode(ASSIGN, {lval, rval});
         }break;
@@ -531,15 +534,49 @@ AstNode* AstNode::parseWhile(lexIter&i){
     return new AstNode(WHILE, {while_expr, body});
 }
 
+void AstNode::parseMethodDecl(Type * this_type){
+    
+    AstNode * this_arg = new AstNode(NAME);
+    memcpy(this_arg->memval, "this", 5);
+    this_arg->val_type = this_type;
+    
+    if(children[1]->t == TYPEDECL){
+        //only one arg
+        children[1] = new AstNode(TUPLE, {this_arg, children[1]});
+    } else if(children[1]->t == TUPLE){
+        //tuple
+        std::vector<AstNode*> expanded_args;
+        expanded_args.push_back(this_arg);
+        for(auto arg:children[1]->children){
+            expanded_args.push_back(arg);
+        }
+        children[1]->children = expanded_args;
+        children[1]->inferTypes();
+    } else {
+        //null args
+        children[1] = this_arg;
+    }
+    
+    parseFundecl(0);
+}
+
 
 void AstNode::parseFundecl(LayoutType * os) {
-    LayoutType * localnamescope = LayoutType::createNamespace();
+    LayoutType * localnamescope = new LayoutType("__f");
     AstNode * name = children[0];
     AstNode * args = children[1];
     AstNode * ret = children[2];
     
     ret->inferTypes();
-    
+    if(!ret->val_type){
+        LayoutType * temp_ns = LayoutType::createNamespace();
+        Type * ret_t = (*temp_ns)[ret->memval];
+        if(ret_t){
+            ret->val_type = ret_t;
+        } else{
+            ret_t = &VoidType;
+        }
+    }
     Type * ret_type  = &VoidType;
     if(ret->val_type != &VoidType){
         ret_type = (*(LayoutType*)ret->val_type)["return"];
@@ -570,11 +607,72 @@ void AstNode::parseFundecl(LayoutType * os) {
     }
 }
 
+
+
+void AstNode::inferClassDeclTypes(){
+    AstNode * classname = children[0];
+    AstNode * body = children[1];
+    LayoutType * classLayout = new LayoutType(classname->memval);
+    LayoutType * vtable = new LayoutType("vtable");
+    classLayout->addType("vtable", vtable);
+    for(auto member: body->children){
+        if(member->t == TYPEDECL || member->t == FUNTYPEDECL){
+            
+            
+            AstNode * member_name = member->children[0];
+            AstNode * rhs = member->children[1];
+            if(rhs->t == SUBSCR){
+                //is mapping
+                Type * valtype = (*(LayoutType*)(rhs->children[0]->val_type))["return"];
+                Type * mapType;
+                if(rhs->children[1]->t != EMPTY)
+                    mapType = (*(LayoutType*)(rhs->children[1])->val_type)["return"];
+                else
+                    mapType = &IntType;
+                LayoutType * newMapType = LayoutType::createMap(mapType, valtype);
+                rhs->val_type = newMapType;
+                member->children[0]->val_type = newMapType;
+            } else if(rhs->t == NAME){
+                Type * local_return = (*namescope)[rhs->memval];
+                if(!local_return){
+                    LayoutType * temp_ns = LayoutType::createNamespace();
+                    member->children[0]->val_type = (*(LayoutType*)(temp_ns->operator[](member->children[1]->memval)))["return"];
+                    delete temp_ns;
+                } else {
+                    member->children[0]->val_type = (*(LayoutType*)local_return)["return"];
+                }
+                
+                
+            } else {
+                children[0]->val_type = children[1]->val_type;
+            }
+            classLayout->addType(member_name->memval, member_name->val_type);
+        }
+        if(member->t == FUNCDEF){
+#warning TODO method decls
+            member->parseMethodDecl(classLayout);
+            vtable->addType(member->children[0]->memval, member->val_type);
+            
+        }
+        
+    }
+    
+    val_type = LayoutType::createFunctionalType(classLayout, &VoidType);
+    namescope->addType(classname->memval, val_type);
+}
+
+
 void AstNode::inferTypes(){
     
     if(namescope == nullptr){
         throw "cannot infer types without context";
     }
+    
+    if(t == CLASSDEF){
+        inferClassDeclTypes();
+        return;
+    }
+    
     
     if(t != ASSIGN && t!= FUNCDEF)
     for(int i = 0; i < children.size(); i++){
@@ -686,7 +784,11 @@ void AstNode::inferTypes(){
             val_type = children[0]->val_type;
             break;
         case AT:{
-            val_type = (*(LayoutType*)children[0]->val_type)[children[1]->memval];
+            LayoutType * parental_type = (LayoutType*)children[0]->val_type;
+            const char * member_name = children[1]->memval;
+            val_type = (*parental_type)[member_name];
+            
+            
         }break;
         case NAME:{
             val_type = (*namescope)[memval];
@@ -706,9 +808,13 @@ void AstNode::inferTypes(){
             AstNode * rhs = children[1];
             if(rhs->t == SUBSCR){
                 //is mapping
-                Type * valtype = (*(LayoutType*)(rhs->children[0]->val_type))["return"];
+                Type * valtype;
+                if(rhs->children[0]->t == NAME)
+                 valtype = (*(LayoutType*)(rhs->children[0]->val_type))["return"];
+                else
+                    valtype = rhs->children[0]->val_type;
                 Type * mapType;
-                if(rhs->children[1]->t != EMPTY)
+                if(rhs->children[1]->t == NAME)
                     mapType = (*(LayoutType*)(rhs->children[1])->val_type)["return"];
                 else
                     mapType = &IntType;
@@ -716,7 +822,16 @@ void AstNode::inferTypes(){
                 rhs->val_type = newMapType;
                 children[0]->val_type = newMapType;
             } else if(rhs->t == NAME){
-                children[0]->val_type = (*(LayoutType*)(rhs->val_type))["return"];
+                Type * local_return = (*namescope)[rhs->memval];
+                if(!local_return){
+                    LayoutType * temp_ns = LayoutType::createNamespace();
+                    children[0]->val_type = (*(LayoutType*)(temp_ns->operator[](children[1]->memval)))["return"];
+                    delete temp_ns;
+                } else {
+                    children[0]->val_type = (*(LayoutType*)local_return)["return"];
+                }
+                
+                
             } else {
                 children[0]->val_type = children[1]->val_type;
             }
@@ -755,7 +870,7 @@ void AstNode::inferTypes(){
         case ASSIGN:{
             if(children[0]->t == TUPLE){
 #warning TODO: tuple case
-            } else {
+            } else if(children[0]->t == NAME){
 #warning TODO: subscr case
                 children[0]->val_type = children[1]->val_type;
                 Type * hadtype = (*namescope)[children[0]->memval];
@@ -766,6 +881,8 @@ void AstNode::inferTypes(){
                     namescope->addType(children[0]->memval, children[0]->val_type);
                 }
                 
+            } else if(children[0]->t == AT){
+                children[0]->inferTypes();
             }
         }break;
         case SUBSCR:{
