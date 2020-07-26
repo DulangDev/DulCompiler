@@ -137,6 +137,22 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXLegacyTarget section */
+		9D62F5BC24CDC1C600DB1486 /* DulangUnix */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = 9D62F5BD24CDC1C600DB1486 /* Build configuration list for PBXLegacyTarget "DulangUnix" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			dependencies = (
+			);
+			name = DulangUnix;
+			passBuildSettingsInEnvironment = 1;
+			productName = DulangUnix;
+		};
+/* End PBXLegacyTarget section */
+
 /* Begin PBXNativeTarget section */
 		9D8D5870244B6BCF00A8C463 /* DulCompiler */ = {
 			isa = PBXNativeTarget;
@@ -164,6 +180,9 @@
 				LastUpgradeCheck = 1140;
 				ORGANIZATIONNAME = "Дмитрий Маслюков";
 				TargetAttributes = {
+					9D62F5BC24CDC1C600DB1486 = {
+						CreatedOnToolsVersion = 11.5;
+					};
 					9D8D5870244B6BCF00A8C463 = {
 						CreatedOnToolsVersion = 11.4;
 					};
@@ -183,6 +202,7 @@
 			projectRoot = "";
 			targets = (
 				9D8D5870244B6BCF00A8C463 /* DulCompiler */,
+				9D62F5BC24CDC1C600DB1486 /* DulangUnix */,
 			);
 		};
 /* End PBXProject section */
@@ -208,6 +228,33 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		9D62F5BE24CDC1C600DB1486 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEBUGGING_SYMBOLS = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = WHPNX2SX7F;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		9D62F5BF24CDC1C600DB1486 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = WHPNX2SX7F;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		9D8D5876244B6BCF00A8C463 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -342,6 +389,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		9D62F5BD24CDC1C600DB1486 /* Build configuration list for PBXLegacyTarget "DulangUnix" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9D62F5BE24CDC1C600DB1486 /* Debug */,
+				9D62F5BF24CDC1C600DB1486 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		9D8D586C244B6BCF00A8C463 /* Build configuration list for PBXProject "DulCompiler" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
