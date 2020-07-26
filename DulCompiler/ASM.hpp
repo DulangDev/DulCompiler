@@ -27,6 +27,7 @@ class ASMWriter{
         const char * symbol_name;
         int pos, size;
     };
+    const IRFunction * f = nullptr;
     std::vector<stub> stubs;
     ASMWriter(const ASMWriter&) = delete;
     static const uint8_t hdrs [];
@@ -151,6 +152,7 @@ public:
    
     void writeIROP(IROP op);
     void writeIRFunction(const IRFunction * func){
+        f = func;
         for(auto op: func->operands){
             writeIROP(op);
         }
