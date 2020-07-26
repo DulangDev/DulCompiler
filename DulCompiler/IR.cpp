@@ -53,18 +53,25 @@ struct ObjectCreator{
     SuperCaller caller;
     int msize;
     FunctionalObject ** vtable;
-    ObjectCreator(int size, FunctionalObject ** vt){
+    FunctionalObject * _constructor;
+    ObjectCreator(int size, FunctionalObject ** vt, FunctionalObject * cr){
         msize = size;
         caller = &constructor;
         vtable = vt;
+        _constructor = cr;
     }
 };
 
-IRFunction::StatVal constructor(void* data, void**){
+IRFunction::StatVal constructor(void* data, void**stack){
     ObjectCreator * cr = (ObjectCreator*)data;
     void * object = calloc(1, cr->msize);
     ((FunctionalObject***)object)[0] = cr->vtable;
+#if debug_allocations
     printf("allocated %d bytes at %p!\n", cr->msize, object);
+#endif
+    if(cr->_constructor){
+#warning TODO: constructors
+    }
     return IRFunction::StatVal{.other = object};
 }
 
@@ -79,6 +86,9 @@ int countFunctionsWithinClass(AstNode * classdef){
 }
 
 FunctionalObject ** classToVtable(AstNode * classdef){
+    
+    char meth_name [100];
+    
     int table_size = countFunctionsWithinClass(classdef);
     FunctionalObject ** table = (FunctionalObject**)malloc(table_size * sizeof(void*));
     AstNode * class_body = classdef->children[1];
@@ -86,8 +96,10 @@ FunctionalObject ** classToVtable(AstNode * classdef){
     for(auto entry: class_body->children){
         if(entry->t == AstNode::FUNCDEF){
             IRFunction * method = new IRFunction(entry->children[3]);
+            sprintf(meth_name, "%s::%s.ir",  classdef->children[0]->memval, entry->children[0]->memval);
             ASMWriter wr;
             wr.writeIRFunction(method);
+            method->print(meth_name);
             auto compiled = wr.generate();
             *writer = new FunctionalObject{method, compiled};
             writer++;
@@ -183,8 +195,13 @@ int IRFunction::destOutASTLoad(AstNode *root, int dest){
             return dest;
         }break;
         case AstNode::NAME:{
-            
-            return namescope->indexOf(root->memval);
+            if(dest == -1)
+                return namescope->indexOf(root->memval);
+            else{
+                
+                operands.push_back(IROP{0, 0, IROP::namestore, dest, namescope->indexOf(root->memval)});
+                return dest;
+            }
         }break;
         case AstNode::TYPECAST:{
             int place = destOutASTLoad(root->children[0], -1);
@@ -214,29 +231,34 @@ int IRFunction::destOutASTLoad(AstNode *root, int dest){
         }break;
         case AstNode::TUPLE:{
             dest = currstackpos;
-            
             for(auto c:root->children){
-                destOutASTLoad(c, currstackpos);
+                int dst = destOutASTLoad(c, currstackpos);
+                if(dst != currstackpos){
+                    operands.push_back(IROP{0, 0, IROP::namestore, currstackpos, dst});
+                }
                 currstackpos+=8;
             }
             return dest;
         }break;
         case AstNode::FCALL:{
-            
+            if(dest == -1){
+                dest = currstackpos;
+                currstackpos+=8;
+            }
+           
             if(root->children[0]->t == AstNode::AT){
 				// method
-				
-				#warning TODO: method call this pass into AST
+                AstNode * method = root->children[0];
+                int arg_place = destOutASTLoad(root->children[1], -1);
+                int fplace = (*(LayoutType*)(*(LayoutType*)method->children[0]->val_type)["vtable"]).indexOf(method->children[1]->memval);
+                operands.push_back(IROP{0, 0, IROP::method_call, dest, arg_place, fplace});
 				
 				
 				
 			} else {
-				int fplace = destOutASTLoad(root->children[0], -1);
-				int argplace = destOutASTLoad(root->children[1], -1);
-				if(dest == -1){
-					dest = currstackpos;
-					currstackpos+=8;
-				}
+				
+                int fplace = destOutASTLoad(root->children[0], -1);
+                int argplace = destOutASTLoad(root->children[1], -1);
 				operands.push_back(IROP{0, 0, IROP::fcall, dest, argplace, fplace});
 			}
             
@@ -248,8 +270,15 @@ int IRFunction::destOutASTLoad(AstNode *root, int dest){
             StatVal classConstructor;
             vals.push_back(classConstructor);
             
+            FunctionalObject ** vt =classToVtable(root);
+            LayoutType * vtable_layout = (LayoutType*)(*(LayoutType*)root->val_type)["vtable"];
+            int constr_idx = 0; //vtable_layout->indexOf("init");
+            FunctionalObject * cons = 0;
+            if(constr_idx != -1){
+                cons = vt[constr_idx/8];
+            }
             
-            vals[vals.size() - 1].other = new ObjectCreator(classSize, classToVtable(root));
+            vals[vals.size() - 1].other = new ObjectCreator(classSize, vt, cons);
             int idx = (int)vals.size() - 1;
             dest = namescope->indexOf(root->children[0]->memval);
             if(dest == -1){
@@ -267,25 +296,18 @@ int IRFunction::destOutASTLoad(AstNode *root, int dest){
             }
             AstNode * rhs = root->children[1];
             AstNode * lhs = root->children[0];
-            if(0){
-                //method call
-                AstNode * method_name = rhs->children[0];
-                AstNode * args = rhs->children[1];
-                LayoutType * vtable = (LayoutType*)(*(LayoutType*)lhs->val_type)["vtable"];
-                int func_idx = (*vtable).indexOf(method_name->memval);
-                int this_arg = destOutASTLoad(lhs, -1);
-                if(lhs->t == AstNode::NAME){
-                    operands.push_back(IROP{0, 0, IROP::namestore, currstackpos, this_arg});
-                }
-                destOutASTLoad(args, -1);
-                operands.push_back(IROP{0, 0, IROP::method_call, dest, func_idx, currstackpos});
-                return dest;
-            } else {
-                int master_idx = ((LayoutType*)lhs->val_type)->indexOf(rhs->memval);
-                int master_place = destOutASTLoad(lhs, -1);
-                operands.push_back(IROP{0, 0, IROP::at, dest, master_idx, master_place});
-                return dest;
+            
+            int master_idx = ((LayoutType*)lhs->val_type)->indexOf(rhs->memval);
+            if(master_idx == -1){
+                master_idx = ((LayoutType*)(*(LayoutType*)lhs->val_type)["vtable"])->indexOf(rhs->memval);
             }
+            if(master_idx == -1){
+                throw SyntaxError{0, 0, "ddd"};
+            }
+            int master_place = destOutASTLoad(lhs, -1);
+            operands.push_back(IROP{0, 0, IROP::at, dest, master_idx, master_place});
+            return dest;
+            
             
             
             

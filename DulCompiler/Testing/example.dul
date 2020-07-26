@@ -1,14 +1,12 @@
 fun main() {
     class A{
-		fun f() {
-			return 5
-		}
 		g:Int
-		fun init(){
-			this.g = 6
+		fun init(b:Int, a:Int){
+			this.g = b
+            write this.g
+            return a
 		}
 	}
 	c = A()
-	c.init()
-	write c.g
+    write c.init(9, 1011)
 }

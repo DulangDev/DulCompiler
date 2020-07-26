@@ -277,8 +277,12 @@ AstNode* AstNode::parseSuffix(lexIter& i){
 				for(auto arg: expr->children){
 					expanded_args.push_back(arg);
 				}
-				 left = new AstNode(FCALL, {left, expr});
+                expr->children = expanded_args;
+                for(auto c : expanded_args){
+                    c->parent = expr;
+                }
 			}
+            left = new AstNode(FCALL, {left, expr});
             
            
         } else if(i->lexType == Lexem::OP_S_BR){
@@ -560,11 +564,11 @@ void AstNode::parseMethodDecl(Type * this_type){
     
     if(children[1]->t == TYPEDECL){
         //only one arg
-        children[1] = new AstNode(TUPLE, {this_arg, children[1]});
+        children[1] = new AstNode(TUPLE, {this_arg_wrapper, children[1]});
     } else if(children[1]->t == TUPLE){
         //tuple
         std::vector<AstNode*> expanded_args;
-        expanded_args.push_back(this_arg);
+        expanded_args.push_back(this_arg_wrapper);
         for(auto arg:children[1]->children){
             expanded_args.push_back(arg);
         }
@@ -599,7 +603,8 @@ void AstNode::parseFundecl(LayoutType * os) {
     if(ret->val_type != &VoidType){
         ret_type = (*(LayoutType*)ret->val_type)["return"];
     }
-    
+    args->setNameScope(LayoutType::createNamespace(), 0);
+    args->inferTypes();
     LayoutType * functype = LayoutType::createFunctionalType(ret_type, args->val_type);
     
     val_type = functype;
@@ -681,7 +686,8 @@ void AstNode::inferClassDeclTypes(){
 
 
 void AstNode::inferTypes(){
-    
+    if(val_type)
+        return;
     if(namescope == nullptr){
         throw "cannot infer types without context";
     }

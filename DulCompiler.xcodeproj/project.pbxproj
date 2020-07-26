@@ -42,6 +42,8 @@
 		9D5EDEAD24C3C56500058FE5 /* DulCompiler.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DulCompiler.entitlements; sourceTree = "<group>"; };
 		9D62F5B724CA307800DB1486 /* ex.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ex.ir; sourceTree = "<group>"; };
 		9D62F5B824CBC58600DB1486 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; usesTabs = 1; };
+		9D62F5BA24CCC96B00DB1486 /* A::init.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "A::init.ir"; sourceTree = "<group>"; };
+		9D62F5BB24CCC96B00DB1486 /* A::f.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "A::f.ir"; sourceTree = "<group>"; };
 		9D8D5871244B6BCF00A8C463 /* DulCompiler */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DulCompiler; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D8D5874244B6BCF00A8C463 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		9D8D587B244B6BEE00A8C463 /* Project.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Project.cpp; sourceTree = "<group>"; };
@@ -72,6 +74,8 @@
 		9D506D7D244E3EA40065BB9C /* Testing */ = {
 			isa = PBXGroup;
 			children = (
+				9D62F5BB24CCC96B00DB1486 /* A::f.ir */,
+				9D62F5BA24CCC96B00DB1486 /* A::init.ir */,
 				9D62F5B724CA307800DB1486 /* ex.ir */,
 				9DF8066924845DE700B274C0 /* main.ir */,
 				9DB0A0F42464D33100D014A7 /* main.ast */,
@@ -318,7 +322,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = DulCompiler/DulCompiler.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = VE99M53YZ4;
+				DEVELOPMENT_TEAM = WHPNX2SX7F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -329,7 +333,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = DulCompiler/DulCompiler.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = VE99M53YZ4;
+				DEVELOPMENT_TEAM = WHPNX2SX7F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

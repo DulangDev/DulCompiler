@@ -30,6 +30,13 @@ ASMWriter::MemFactory CallRax           ({0xff, 0xd0}, 0, 0);
 ASMWriter::MemFactory StackShiftToRSI   ({0x4C, 0x89, 0xFE, 0x48, 0x81, 0xC6, 0x88, 0x00, 0x00, 0x00}, 6, 4);
 ASMWriter::MemFactory RaxToStack        ({0x49, 0x89, 0x87, 0x88, 0x00, 0x00, 0x00}, 3, 4);
 ASMWriter::MemFactory ReturnVal         ({0x49, 0x8B, 0x87, 0x88, 0x00, 0x00, 0x00, 0x5D, 0xC3}, 3, 4);
+ASMWriter::MemFactory R11DertoR10({0x4D, 0x8B, 0x93, 00, 0x00, 0x00, 0x00}, 3, 4);
+ASMWriter::MemFactory R10dertoR10({0x4D, 0x8B, 0x92, 0x00, 0x00, 0x00, 0x00}, 3, 4);
+ASMWriter::MemFactory R10dertoRax({0x49, 0x8B, 0x82, 0x00, 0x00, 0x00, 0x00}, 3, 4);
+ASMWriter::MemFactory R11toRDI({ 0x4C, 0x89, 0xDF }, 0, 0);
+ASMWriter::MemFactory R11toRax({ 0x4C, 0x89, 0xD8 }, 0, 0);
+ASMWriter::MemFactory R10dertoR11({0x4D, 0x8B, 0x9A, 0x88, 0x00, 0x00, 0x00}, 3, 4);
+ASMWriter::MemFactory R11dertoR11({ 0x4D, 0x8B, 0x9B, 0x88, 0x00, 0x00, 0x00 }, 3, 4);
 //takes as parameter register no
 
 void write_int(void * arg){
@@ -48,13 +55,13 @@ ASMWriter::compiledFunc ASMWriter::generate() const {
     void * _mem = mmap(0, memsize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON | MAP_JIT, -1, 0);
     memcpy(_mem, mem, memsize);
     mprotect(_mem, memsize, PROT_READ | PROT_EXEC);
-    /*printf("function compilied: ");
+    printf("function compiled at %p: ", _mem);
     for(int i = 0; i < memsize; i++){
         uint8_t u = mem[i];
         printf("%02X", u);
     }
     printf("\n");
-    */
+    
     
     return (ASMWriter::compiledFunc)(_mem);
 }
@@ -119,25 +126,29 @@ void ASMWriter::writeIROP(IROP op){
             writeMem(StackToR11(&op.sarg));
             //then we put into r10 value at [r11 + offset]
             
-            ASMWriter::MemFactory R11DertoR10({0x4D, 0x8B, 0x93, 0x88, 0x00, 0x00, 0x00}, 3, 4);
+           
             writeMem(R11DertoR10(&op.farg));
             //then we put r10 to stack
             writeMem(R10ToStack(&op.dest));
             
         }break;
         case IROP::method_call:{
-            writeMem(StackToR11(&op.sarg));
-            uint8_t VtableToR10 [] = { 0x4D, 0x8B, 0x13 };
-            writeMem(VtableToR10, sizeof(VtableToR10));
-            ASMWriter::MemFactory DerefVtableToRax ({0x49, 0x8B, 0x82, 0x88, 0x00, 0x00, 0x00}, 3, 4);
-            writeMem(DerefVtableToRax(&op.farg));
-            uint8_t ThisToRDI [] ={ 0x48, 0x89, 0xC7 };
-            writeMem(ThisToRDI, sizeof(ThisToRDI));
-            writeMem(DerefRax);
-            
+            // here we have op.dest for result putting
+            // op.farg as stack-arg-offset
+            // op.sarg as offset in vtable
+            writeMem(StackToR10(&op.farg));
+            int vt_offset = 0;
+            writeMem(R10dertoR11(&vt_offset));
+            writeMem(R11dertoR11(&op.sarg));
+            writeMem(R11toRDI);
+            writeMem(R11toRax);
             writeMem(StackShiftToRSI(&op.farg));
+            writeMem(DerefRax);
             writeMem(CallRax);
             writeMem(RaxToStack(&op.dest));
+            
+           
+          
         }break;
         
         default:
@@ -156,5 +167,6 @@ const uint8_t ASMWriter::hdrs [] = {
 };
 IRFunction::StatVal func_caller(void*data, void**stack){
     FunctionalObject * fo = (FunctionalObject*)data;
+    printf("Executing function at %p\n", fo->executable);
     return fo->executable(stack, (void**)fo->context->vals.data());
 }
