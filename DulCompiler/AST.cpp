@@ -7,6 +7,7 @@
 //
 
 #include "AST.hpp"
+#include "inferAlgorithm.hpp"
 #define COMP_ERR 1
 
 AstNode* AstNode::parseFile(const char * name){
@@ -296,7 +297,7 @@ AstNode* AstNode::parseSuffix(lexIter& i){
             }
             i++;
             left =  new AstNode(SUBSCR, {left, expr});
-        } else if(0){
+        } else if(/* DISABLES CODE */ (0)){
             i++;
             AstNode * rhs = parseSuffix(i);
             left =  new AstNode(AT, {left, rhs});
@@ -489,7 +490,8 @@ const char * AstNode::typerepr [] = {
     "INTERFACE",
     "SUBSCR",
     "TYPECAST",
-    "FUNTYPEDECL"
+    "FUNTYPEDECL",
+    "CLOSURE"
 };
 
 AstNode* AstNode::parseIf(lexIter& i){
@@ -585,6 +587,8 @@ void AstNode::parseMethodDecl(Type * this_type){
 
 void AstNode::parseFundecl(LayoutType * os) {
     LayoutType * localnamescope = new LayoutType("__f");
+    setNameScope(localnamescope, os);
+    outerscope = os;
     AstNode * name = children[0];
     AstNode * args = children[1];
     AstNode * ret = children[2];
@@ -603,13 +607,13 @@ void AstNode::parseFundecl(LayoutType * os) {
     if(ret->val_type != &VoidType){
         ret_type = (*(LayoutType*)ret->val_type)["return"];
     }
-    args->setNameScope(LayoutType::createNamespace(), 0);
+    //args->setNameScope(LayoutType::createNamespace(), 0);
     args->inferTypes();
     LayoutType * functype = LayoutType::createFunctionalType(ret_type, args->val_type);
     
     val_type = functype;
     name->val_type = functype;
-    namescope->addType(name->memval, functype);
+    //namescope->addType(name->memval, functype);
     
     AstNode * body = children[3];
     if(children.size() >= 4){
@@ -716,7 +720,7 @@ void AstNode::inferTypes(){
             val_type = &FloatType;
             break;
         case STRLIT:
-            val_type = &StringType;
+            val_type =0;
             break;
         case TYPECAST:{
             Type * _t;
@@ -734,7 +738,9 @@ void AstNode::inferTypes(){
             Type * arg=0, *ret;
             if(children[0]->t == TUPLE){
                 std::vector<Type*> types;
+                
                 for(auto c: children[0]->children){
+                    c->inferTypes();
                     types.push_back((*(LayoutType*)c->val_type)["return"]);
                 }
                 arg = LayoutType::createTuple(types);
@@ -745,6 +751,8 @@ void AstNode::inferTypes(){
             } else {
 #warning TODO: throw semantic error
             }
+            if(!children[1]->val_type)
+                children[1]->inferTypes();
             ret = (*(LayoutType*)children[1]->val_type)["return"];
             val_type = LayoutType::createFunctionalType(ret, arg);
         }break;
@@ -795,13 +803,19 @@ void AstNode::inferTypes(){
                     children[1]->val_type = &FloatType;
                 }
                 
-            }
+            }/*
             if(lhs->val_type == &StringType && rhs->val_type == &StringType && t == ADD){
                 val_type = &StringType;
-            }
+            }*/
             if(!val_type)
                 throw new SyntaxError{0, 0, "cannot infer type"};
             
+        }break;
+        case CLOSURE:{
+            LayoutType * intermediate = LayoutType::createNamespace();
+            if(!val_type){
+                val_type = (*intermediate)[memval];
+            }
         }break;
         case RET:
         case WRITE:
@@ -831,10 +845,20 @@ void AstNode::inferTypes(){
                 while(walker && walker->t != FUNCDEF){
                     walker = walker->parent;
                 }
-                
-                
-                
-                
+                //recursive search algorithm
+#warning TODO: implement real closuring algorithm
+                //in current approach only one-level closures are allowed
+                if(walker){
+                    t = CLOSURE;
+                    
+                    AstNode * fp = walker->getFunctionalParent();
+                    parent = fp;
+                    val_type = (*fp->namescope)[memval];
+                    if(!val_type){
+                        break;
+                    }
+                    walker->children[5]->children.push_back(this);
+                }
                 walker;
             }
         }break;
@@ -905,7 +929,6 @@ void AstNode::inferTypes(){
             if(children[0]->t == TUPLE){
 #warning TODO: tuple case
             } else if(children[0]->t == NAME){
-#warning TODO: subscr case
                 children[0]->val_type = children[1]->val_type;
                 Type * hadtype = (*namescope)[children[0]->memval];
                 if(hadtype && hadtype != children[0]->val_type){

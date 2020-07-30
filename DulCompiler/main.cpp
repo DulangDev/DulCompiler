@@ -12,17 +12,30 @@
 #include "IR.hpp"
 #include "ASM.hpp"
 
+
+void processGlobal(AstNode * root){
+    // in this node only funcdefs and classdefs are allowed (interfaces ?)
+    // empty btw will also appear, ignore them
+    LayoutType * global = LayoutType::createNamespace();
+    for(auto c:root->children){
+        c->setNameScope(global, global);
+    }
+    root->inferTypes();
+}
+
 int main(int argc, const char * argv[]) {
     // insert code here...
-    AstNode * p = AstNode::parseFile("example.dul")->children[0];
-    LayoutType * namescope =LayoutType::createNamespace();
-    p->setNameScope(namescope, namescope);
+    AstNode * p = AstNode::parseFile("example.dul");
+    LayoutType * global = LayoutType::createNamespace();
+    p->setNameScope(global, global);
+    
+   
     setFunctionParenthesisDownwalk(p);
     p->inferTypes();
     //p->removeRedundant();
     std::ofstream a("main.ast");
     p->print(0, a);
-    IRFunction f(p->children[3]);
+    IRFunction f(p->children[3]->children[3]);
     f.print("main.ir");
     ASMWriter writer;
     writer.writeIRFunction(&f);
@@ -31,7 +44,7 @@ int main(int argc, const char * argv[]) {
    
     
     void ** stack = (void**)malloc(1024);
-    compiled(stack, (void**)f.vals.data());
+    compiled(stack, (void**)f.vals.data(), 0);
     
     return 0;
 }

@@ -1,14 +1,18 @@
-var b of type Int
 var a of type Int
-var init of type fun(Tuple<A,Int,Int>)->Void
-var A of type fun(Void)->A
-var c of type A
+var b of type Int
+var f of type fun(Void)->Void
+var param of type fun(Void)->Void
+var w of type fun(fun(Void)->Void)->Void
 code: --------
-vpush 0 24 0
-call 40 48 24
+vpush 0 40 0
+namestore 0 40 0
+vpush 8 40 0
+namestore 8 40 0
+namestore 48 8 0
+namestore 56 0 0
+funcdef 16 40 48
+namestore 16 40 0
+funcdef 24 40 48
 namestore 32 40 0
-namestore 48 32 0
-vpush 8 56 0
-vpush 16 64 0
-method_cal 40 48 0
-iwrite 40 0 0
+namestore 48 16 0
+call 40 48 32

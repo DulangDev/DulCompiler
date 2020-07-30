@@ -34,7 +34,9 @@ struct IROP{
         at,
         set_member,
         method_call,
-        umin
+        umin,
+        get_closure,
+        funcdef
         
 
     };

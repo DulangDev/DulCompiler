@@ -11,11 +11,13 @@
 		9D506D79244DBFE00065BB9C /* IR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D506D77244DBFE00065BB9C /* IR.cpp */; };
 		9D506D7C244DC0DE0065BB9C /* ASM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D506D7A244DC0DE0065BB9C /* ASM.cpp */; };
 		9D62F5B924CBC58600DB1486 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 9D62F5B824CBC58600DB1486 /* Makefile */; };
+		9D62F5C224D0B12000DB1486 /* Bin_class.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D62F5C024D0B11F00DB1486 /* Bin_class.cpp */; };
 		9D8D5875244B6BCF00A8C463 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D8D5874244B6BCF00A8C463 /* main.cpp */; };
 		9D8D587D244B6BEE00A8C463 /* Project.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D8D587B244B6BEE00A8C463 /* Project.cpp */; };
 		9D8D5880244B6C1F00A8C463 /* Type.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D8D587E244B6C1F00A8C463 /* Type.cpp */; };
 		9D8D5883244B6D7500A8C463 /* Lexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D8D5881244B6D7500A8C463 /* Lexer.cpp */; };
 		9D8D5886244B6D7E00A8C463 /* AST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D8D5884244B6D7E00A8C463 /* AST.cpp */; };
+		9DB8700B24D20F390084EB67 /* inferAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9DB8700924D20F390084EB67 /* inferAlgorithm.cpp */; };
 		9DF1085224756F52002F46A9 /* bin_str.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9DF1085024756F52002F46A9 /* bin_str.cpp */; };
 /* End PBXBuildFile section */
 
@@ -40,10 +42,15 @@
 		9D506D7B244DC0DE0065BB9C /* ASM.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ASM.hpp; sourceTree = "<group>"; };
 		9D506D7E244E3EB90065BB9C /* example.dul */ = {isa = PBXFileReference; lastKnownFileType = text; path = example.dul; sourceTree = "<group>"; };
 		9D5EDEAD24C3C56500058FE5 /* DulCompiler.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DulCompiler.entitlements; sourceTree = "<group>"; };
+		9D6132D824D2FABD00ECCB29 /* _.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = _.ir; sourceTree = "<group>"; };
+		9D6132D924D2FCD200ECCB29 /* wr_.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = wr_.ir; sourceTree = "<group>"; };
+		9D6132DA24D2FCD200ECCB29 /* f_.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = f_.ir; sourceTree = "<group>"; };
 		9D62F5B724CA307800DB1486 /* ex.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ex.ir; sourceTree = "<group>"; };
 		9D62F5B824CBC58600DB1486 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; usesTabs = 1; };
 		9D62F5BA24CCC96B00DB1486 /* A::init.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "A::init.ir"; sourceTree = "<group>"; };
 		9D62F5BB24CCC96B00DB1486 /* A::f.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "A::f.ir"; sourceTree = "<group>"; };
+		9D62F5C024D0B11F00DB1486 /* Bin_class.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Bin_class.cpp; sourceTree = "<group>"; };
+		9D62F5C124D0B11F00DB1486 /* Bin_class.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Bin_class.hpp; sourceTree = "<group>"; };
 		9D8D5871244B6BCF00A8C463 /* DulCompiler */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DulCompiler; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D8D5874244B6BCF00A8C463 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		9D8D587B244B6BEE00A8C463 /* Project.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Project.cpp; sourceTree = "<group>"; };
@@ -55,6 +62,9 @@
 		9D8D5884244B6D7E00A8C463 /* AST.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AST.cpp; sourceTree = "<group>"; };
 		9D8D5885244B6D7E00A8C463 /* AST.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AST.hpp; sourceTree = "<group>"; };
 		9DB0A0F42464D33100D014A7 /* main.ast */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.ast; sourceTree = "<group>"; };
+		9DB8700924D20F390084EB67 /* inferAlgorithm.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = inferAlgorithm.cpp; sourceTree = "<group>"; };
+		9DB8700A24D20F390084EB67 /* inferAlgorithm.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = inferAlgorithm.hpp; sourceTree = "<group>"; };
+		9DB8700C24D20FA10084EB67 /* example.dp */ = {isa = PBXFileReference; lastKnownFileType = text; path = example.dp; sourceTree = "<group>"; };
 		9DF1085024756F52002F46A9 /* bin_str.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = bin_str.cpp; sourceTree = "<group>"; };
 		9DF1085124756F52002F46A9 /* bin_str.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bin_str.hpp; sourceTree = "<group>"; };
 		9DF8066924845DE700B274C0 /* main.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.ir; sourceTree = "<group>"; };
@@ -74,12 +84,16 @@
 		9D506D7D244E3EA40065BB9C /* Testing */ = {
 			isa = PBXGroup;
 			children = (
+				9D6132DA24D2FCD200ECCB29 /* f_.ir */,
+				9D6132D924D2FCD200ECCB29 /* wr_.ir */,
+				9D6132D824D2FABD00ECCB29 /* _.ir */,
 				9D62F5BB24CCC96B00DB1486 /* A::f.ir */,
 				9D62F5BA24CCC96B00DB1486 /* A::init.ir */,
 				9D62F5B724CA307800DB1486 /* ex.ir */,
 				9DF8066924845DE700B274C0 /* main.ir */,
 				9DB0A0F42464D33100D014A7 /* main.ast */,
 				9D506D7E244E3EB90065BB9C /* example.dul */,
+				9DB8700C24D20FA10084EB67 /* example.dp */,
 			);
 			path = Testing;
 			sourceTree = "<group>";
@@ -107,6 +121,10 @@
 				9DF1084F24756F41002F46A9 /* BuiltIn */,
 				9D506D7D244E3EA40065BB9C /* Testing */,
 				9D8D5874244B6BCF00A8C463 /* main.cpp */,
+				9DB8700924D20F390084EB67 /* inferAlgorithm.cpp */,
+				9DB8700A24D20F390084EB67 /* inferAlgorithm.hpp */,
+				9D62F5C024D0B11F00DB1486 /* Bin_class.cpp */,
+				9D62F5C124D0B11F00DB1486 /* Bin_class.hpp */,
 				9D8D587B244B6BEE00A8C463 /* Project.cpp */,
 				9D8D587C244B6BEE00A8C463 /* Project.hpp */,
 				9D8D587E244B6C1F00A8C463 /* Type.cpp */,
@@ -218,9 +236,11 @@
 				9D8D5886244B6D7E00A8C463 /* AST.cpp in Sources */,
 				9D8D5880244B6C1F00A8C463 /* Type.cpp in Sources */,
 				9D8D5875244B6BCF00A8C463 /* main.cpp in Sources */,
+				9D62F5C224D0B12000DB1486 /* Bin_class.cpp in Sources */,
 				9D8D5883244B6D7500A8C463 /* Lexer.cpp in Sources */,
 				9DF1085224756F52002F46A9 /* bin_str.cpp in Sources */,
 				9D506D79244DBFE00065BB9C /* IR.cpp in Sources */,
+				9DB8700B24D20F390084EB67 /* inferAlgorithm.cpp in Sources */,
 				9D8D587D244B6BEE00A8C463 /* Project.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

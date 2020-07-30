@@ -45,7 +45,7 @@ class ASMWriter{
     }
     
     void writeFooter(){
-        uint8_t mem []= {0x5d, 0xc3};
+        uint8_t mem []= {0x41, 0x5D, 0x5d, 0xc3};
         writeMem(mem, sizeof(mem));
     }
 public:
@@ -130,7 +130,7 @@ public:
         writeMem(mem.mem, mem.memsize);
     }
     
-    using compiledFunc = IRFunction::StatVal(*)(void**stack, void**data);
+    using compiledFunc = IRFunction::StatVal(*)(void**stack, void**data, void**clos);
     compiledFunc generate() const;
     ASMWriter(){
         mem = (uint8_t*)malloc(1024);
@@ -172,11 +172,23 @@ struct FunctionalObject{
     SuperCaller caller;
     IRFunction * context;
     ASMWriter::compiledFunc executable;
-    
-    FunctionalObject(IRFunction * ir, ASMWriter::compiledFunc f){
+    AstNode * fdef;
+    void ** closures = 0;
+    FunctionalObject(IRFunction * ir, ASMWriter::compiledFunc f, AstNode*__f){
         context = ir;
         executable = f;
         caller = &func_caller;
+        fdef = __f;
+    }
+    
+    FunctionalObject * inferClosures(void** stackpos){
+        FunctionalObject * new_f = new FunctionalObject{context, executable, fdef};
+        size_t clos_count = fdef->children[5]->children.size();
+        new_f->closures = (void**)malloc(sizeof(void*)*clos_count);
+        for(int i = 0; i < clos_count; i++){
+            new_f->closures[i] = stackpos[i];
+        }
+        return new_f;
     }
 };
 

@@ -147,7 +147,6 @@ extern Type IntType;
 extern Type FloatType;
 extern Type BoolType;
 extern Type VoidType;
-extern Type StringType;
 extern Type ObjectType;
 
 bool isPrimitive(Type*);

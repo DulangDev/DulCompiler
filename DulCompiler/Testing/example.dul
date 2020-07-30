@@ -1,12 +1,17 @@
-fun main() {
-    class A{
-		g:Int
-		fun init(b:Int, a:Int){
-			this.g = b
-            write this.g
-            return a
-		}
-	}
-	c = A()
-    write c.init(9, 1011)
+class B{
+    a:Int
+}
+
+fun main( ){
+    a = 2
+    b = 1939
+    f = fun f(){
+        write b
+        return a
+    }
+    w = fun wr ( param : ()->Void ){
+        write param
+        write param()
+    }
+    w(f)
 }

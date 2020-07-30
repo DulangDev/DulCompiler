@@ -29,7 +29,7 @@ ASMWriter::MemFactory DerefRax          ({0x48, 0x8B, 0x00}, 0, 0);
 ASMWriter::MemFactory CallRax           ({0xff, 0xd0}, 0, 0);
 ASMWriter::MemFactory StackShiftToRSI   ({0x4C, 0x89, 0xFE, 0x48, 0x81, 0xC6, 0x88, 0x00, 0x00, 0x00}, 6, 4);
 ASMWriter::MemFactory RaxToStack        ({0x49, 0x89, 0x87, 0x88, 0x00, 0x00, 0x00}, 3, 4);
-ASMWriter::MemFactory ReturnVal         ({0x49, 0x8B, 0x87, 0x88, 0x00, 0x00, 0x00, 0x5D, 0xC3}, 3, 4);
+ASMWriter::MemFactory ReturnVal         ({0x49, 0x8B, 0x87, 0x88, 0x00, 0x00, 0x00, 0x5D, 0xC3, 0x41, 0x5D}, 3, 4);
 ASMWriter::MemFactory R11DertoR10       ({0x4D, 0x8B, 0x93, 00, 0x00, 0x00, 0x00}, 3, 4);
 ASMWriter::MemFactory R10dertoR10       ({0x4D, 0x8B, 0x92, 0x00, 0x00, 0x00, 0x00}, 3, 4);
 ASMWriter::MemFactory R10dertoRax       ({0x49, 0x8B, 0x82, 0x00, 0x00, 0x00, 0x00}, 3, 4);
@@ -37,6 +37,8 @@ ASMWriter::MemFactory R11toRDI          ({0x4C, 0x89, 0xDF}, 0, 0);
 ASMWriter::MemFactory R11toRax          ({0x4C, 0x89, 0xD8}, 0, 0);
 ASMWriter::MemFactory R10dertoR11       ({0x4D, 0x8B, 0x9A, 0x88, 0x00, 0x00, 0x00}, 3, 4);
 ASMWriter::MemFactory R11dertoR11       ({0x4D, 0x8B, 0x9B, 0x88, 0x00, 0x00, 0x00}, 3, 4);
+
+ASMWriter::MemFactory ClosToR10         ({0x4D, 0x8B, 0x95, 0x88, 0x00, 0x00, 0x00}, 3, 4);
 //ASMWriter::MemFactory RaxToStack        ({0x49, 0x89, 0x87, 0x88, 0x00, 0x00, 0x00}, 3, 4);
 
 //takes as parameter register no
@@ -46,6 +48,7 @@ void write_int(void * arg){
 }
 #define PRINTER_REG_R10 0xD7
 #define PRINTER_REG_R11 0xDF
+#define PRINTER_REG_R13 0xEF
 ASMWriter::MemFactory::GeneratedMem printTempregister(uint8_t Rno){
     ASMWriter::MemFactory RegToRDI({ 0x4C, 0x89, 0xD7 }, 2, 1);
     return RegToRDI(&Rno) + MovAbsToRax.produceFunPtr(&write_int) + CallRax;
@@ -153,7 +156,24 @@ void ASMWriter::writeIROP(IROP op){
            
           
         }break;
-        
+        case IROP::get_closure:{
+            writeMem(printTempregister(PRINTER_REG_R13));
+            writeMem(ClosToR10(&op.farg));
+            writeMem(R10ToStack(&op.dest));
+        }break;
+        case IROP::funcdef:{
+            int push_to = op.farg;
+            int fo_pos = op.dest;
+            int closures = op.sarg;
+            MemFactory MovAbsToRdi({ 0x48, 0xBF, 0x31, 0x09, 0x02, 0x01, 0x00, 0x00, 0x00, 0x00 }, 2, 8);
+            void * p = ((void**)f->vals.data())[fo_pos/8];
+            writeMem(MovAbsToRdi(&p));
+            writeMem(StackShiftToRSI(&closures));
+            writeMem(MovAbsToRax.produceFunPtr(&FunctionalObject::inferClosures));
+            writeMem(CallRax);
+            writeMem(RaxToStack(&push_to));
+            
+        }break;
         default:
             break;
     }
@@ -164,12 +184,9 @@ void ASMWriter::inlineFunction(void *fp, int argc, int size, int frameofft, void
     uint8_t * func_mem = (uint8_t*)fp + sizeof(10);
     
 }
-const uint8_t ASMWriter::hdrs [] = {
-    0x55, 0x49, 0x89, 0xFF, 0x49, 0x89, 0xF6, 0x49, 0x89, 0xfd
-    
-};
+const uint8_t ASMWriter::hdrs [] = { 0x55, 0x41, 0x55, 0x49, 0x89, 0xFF, 0x49, 0x89, 0xF6, 0x49, 0x89, 0xD5 };
 IRFunction::StatVal func_caller(void*data, void**stack){
     FunctionalObject * fo = (FunctionalObject*)data;
     printf("Executing function at %p\n", fo->executable);
-    return fo->executable(stack, (void**)fo->context->vals.data());
+    return fo->executable(stack, (void**)fo->context->vals.data(), fo->closures);
 }

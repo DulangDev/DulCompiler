@@ -57,7 +57,8 @@ public:
         INTERFACE,
         SUBSCR,
         TYPECAST,
-        FUNTYPEDECL
+        FUNTYPEDECL,
+        CLOSURE
     };
     
     
@@ -116,6 +117,20 @@ public:
     
     LayoutType * getNamescope() {
         return namescope;
+    }
+    
+    AstNode * getFunctionalParent(){
+        if(t == FUNCDEF){
+            return children[4];
+        }
+        return NULL;
+    }
+    
+    AstNode * get_closures(){
+        if(t == FUNCDEF){
+            return children[5];
+        }
+        return NULL;
     }
     
     void parseFundecl(LayoutType * os);

@@ -27,7 +27,9 @@ const char * IROP::typerepr[] = {
     "at",
     "set_member",
     "method_call",
-    "umin"
+    "umin",
+    "closure_get",
+    "funcdef"
     
 };
 
@@ -101,7 +103,7 @@ FunctionalObject ** classToVtable(AstNode * classdef){
             wr.writeIRFunction(method);
             method->print(meth_name);
             auto compiled = wr.generate();
-            *writer = new FunctionalObject{method, compiled};
+            *writer = new FunctionalObject{method, compiled, entry};
             writer++;
         }
     }
@@ -139,7 +141,7 @@ void IRFunction::writeStatement(AstNode *statement){
             }
         }break;
         case AstNode::WRITE:{
-            if(1 || statement->val_type == &IntType){
+            if(/* DISABLES CODE */ (1) || statement->val_type == &IntType){
                 //iwrite
                 int place = destOutASTLoad(statement->children[0], -1);
                 operands.push_back(IROP{0, 0, IROP::iwrite, place});
@@ -212,21 +214,45 @@ int IRFunction::destOutASTLoad(AstNode *root, int dest){
             operands.push_back(IROP{0, 0, IROP::itof, dest, place});
             return dest;
         }break;
+        case AstNode::CLOSURE:{
+            
+            
+            auto cl_coll = head->parent->children[5]->children;
+            if(dest == -1){
+                dest = currstackpos;
+                currstackpos += 8;
+            }
+            for(int i = 0; i < cl_coll.size(); i++){
+                if(strcmp(root->memval, cl_coll[i]->memval) == 0){
+                    operands.push_back(IROP{0, 0, IROP::get_closure, dest, i});
+                }
+            }
+            return dest;
+        }break;
         case AstNode::FUNCDEF:{
             IRFunction * new_func = new IRFunction(root->children[3]);
-            new_func->print("ex.ir");
+            char name [100];
+            sprintf(name, "%s_.ir", root->children[0]->memval);
+            new_func->print(name);
             ASMWriter writer;
             writer.writeIRFunction(new_func);
             auto compiled = writer.generate();
             StatVal func_value = StatVal();
             vals.push_back(func_value);
-            vals[vals.size() - 1].other = new FunctionalObject{new_func, compiled};
+            vals[vals.size() - 1].other = new FunctionalObject{new_func, compiled, root};
             int idx = (int)vals.size() - 1;
             if(dest == -1){
                 dest = currstackpos;
                 currstackpos += 8;
             }
-            operands.push_back(IROP{0, 0, IROP::vpush, idx*8, dest});
+            int clos = currstackpos;
+            for(AstNode * closure: root->children[5]->children){
+                operands.push_back(IROP{0, 0, IROP::namestore, currstackpos, namescope->indexOf(closure->memval)});
+                currstackpos+=8;
+            }
+            
+            
+            operands.push_back(IROP{0, 0, IROP::funcdef, idx*8, dest, clos});
             return dest;
         }break;
         case AstNode::TUPLE:{
