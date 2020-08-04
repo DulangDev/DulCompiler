@@ -1,7 +1,3 @@
-class B{
-    
-}
-
 fun main( ){
     class A{
         g:Int

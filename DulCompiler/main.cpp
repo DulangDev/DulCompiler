@@ -27,15 +27,15 @@ int main(int argc, const char * argv[]) {
     // insert code here...
     AstNode * p = AstNode::parseFile("example.dul");
     LayoutType * global = LayoutType::createNamespace();
-    p->children[3]->setNameScope(global, global);
+    p->children[0]->setNameScope(global, global);
     
    
     setFunctionParenthesisDownwalk(p);
-    p->children[3]->inferTypes();
+    p->children[0]->inferTypes();
     //p->removeRedundant();
     std::ofstream a("main.ast");
     p->print(0, a);
-    IRFunction f(p->children[3]->children[3]);
+    IRFunction f(p->children[0]->children[3]);
     f.print("main.ir");
     ASMWriter writer;
     writer.writeIRFunction(&f);
