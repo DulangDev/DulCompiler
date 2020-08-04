@@ -1,18 +1,10 @@
-var a of type Int
-var b of type Int
-var f of type fun(Void)->Void
-var param of type fun(Void)->Void
-var w of type fun(fun(Void)->Void)->Void
+var A of type fun(Void)->A
+var a of type A
 code: --------
-vpush 0 40 0
-namestore 0 40 0
-vpush 8 40 0
-namestore 8 40 0
-namestore 48 8 0
-namestore 56 0 0
-funcdef 16 40 48
-namestore 16 40 0
-funcdef 24 40 48
-namestore 32 40 0
-namestore 48 16 0
-call 40 48 32
+vpush 0 0 0
+call 16 24 0
+namestore 8 16 0
+namestore 24 8 0
+vpush 8 32 0
+method_cal 16 24 0
+iwrite 16 0 0

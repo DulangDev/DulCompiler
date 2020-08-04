@@ -33,7 +33,7 @@ struct vt_entry {
 typedef vt_entry** vt_object;
 
 vt_object create_VT(vtable_init_list);
-
+void init_string_type(void);
 };
 
 

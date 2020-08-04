@@ -49,9 +49,13 @@ void write_int(void * arg){
 #define PRINTER_REG_R10 0xD7
 #define PRINTER_REG_R11 0xDF
 #define PRINTER_REG_R13 0xEF
+#define PRINTER_REG_RAX 0xc7
 ASMWriter::MemFactory::GeneratedMem printTempregister(uint8_t Rno){
-    ASMWriter::MemFactory RegToRDI({ 0x4C, 0x89, 0xD7 }, 2, 1);
-    return RegToRDI(&Rno) + MovAbsToRax.produceFunPtr(&write_int) + CallRax;
+    auto RegToRDI = new ASMWriter::MemFactory ({ 0x4C, 0x89, 0xD7 }, 2, 1);
+    if(Rno == PRINTER_REG_RAX){
+        RegToRDI = new ASMWriter::MemFactory({ 0x48, 0x89, 0xC7 }, 2, 1);
+    }
+    return (*RegToRDI)(&Rno) + MovAbsToRax.produceFunPtr(&write_int) + CallRax;
 }
 #ifndef MAP_JIT
 #define MAP_JIT 0
@@ -108,7 +112,9 @@ void ASMWriter::writeIROP(IROP op){
             writeMem(StackShiftToRSI(&framesize));
             //mov this to rax
             writeMem(StackToRax(&place));
+        
             writeMem(DerefRax);
+            
             //call rax
             writeMem(CallRax);
             //put rax to place in stack
@@ -157,7 +163,7 @@ void ASMWriter::writeIROP(IROP op){
           
         }break;
         case IROP::get_closure:{
-            writeMem(printTempregister(PRINTER_REG_R13));
+            
             writeMem(ClosToR10(&op.farg));
             writeMem(R10ToStack(&op.dest));
         }break;
@@ -184,7 +190,7 @@ void ASMWriter::inlineFunction(void *fp, int argc, int size, int frameofft, void
     uint8_t * func_mem = (uint8_t*)fp + sizeof(10);
     
 }
-const uint8_t ASMWriter::hdrs [] = { 0x55, 0x41, 0x55, 0x49, 0x89, 0xFF, 0x49, 0x89, 0xF6, 0x49, 0x89, 0xD5 };
+
 IRFunction::StatVal func_caller(void*data, void**stack){
     FunctionalObject * fo = (FunctionalObject*)data;
     printf("Executing function at %p\n", fo->executable);

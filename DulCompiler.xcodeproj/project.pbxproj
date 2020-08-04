@@ -45,6 +45,7 @@
 		9D6132D824D2FABD00ECCB29 /* _.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = _.ir; sourceTree = "<group>"; };
 		9D6132D924D2FCD200ECCB29 /* wr_.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = wr_.ir; sourceTree = "<group>"; };
 		9D6132DA24D2FCD200ECCB29 /* f_.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = f_.ir; sourceTree = "<group>"; };
+		9D61331924D9F23C00ECCB29 /* A::at.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "A::at.ir"; sourceTree = "<group>"; };
 		9D62F5B724CA307800DB1486 /* ex.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ex.ir; sourceTree = "<group>"; };
 		9D62F5B824CBC58600DB1486 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; usesTabs = 1; };
 		9D62F5BA24CCC96B00DB1486 /* A::init.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "A::init.ir"; sourceTree = "<group>"; };
@@ -84,6 +85,7 @@
 		9D506D7D244E3EA40065BB9C /* Testing */ = {
 			isa = PBXGroup;
 			children = (
+				9D61331924D9F23C00ECCB29 /* A::at.ir */,
 				9D6132DA24D2FCD200ECCB29 /* f_.ir */,
 				9D6132D924D2FCD200ECCB29 /* wr_.ir */,
 				9D6132D824D2FABD00ECCB29 /* _.ir */,

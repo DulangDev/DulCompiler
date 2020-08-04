@@ -61,6 +61,7 @@ struct ObjectCreator{
         caller = &constructor;
         vtable = vt;
         _constructor = cr;
+        printf("constructor at %lld\n", this);
     }
 };
 
@@ -68,7 +69,7 @@ IRFunction::StatVal constructor(void* data, void**stack){
     ObjectCreator * cr = (ObjectCreator*)data;
     void * object = calloc(1, cr->msize);
     ((FunctionalObject***)object)[0] = cr->vtable;
-#if debug_allocations
+#if 1
     printf("allocated %d bytes at %p!\n", cr->msize, object);
 #endif
     if(cr->_constructor){
@@ -313,7 +314,7 @@ int IRFunction::destOutASTLoad(AstNode *root, int dest){
             }
             operands.push_back(IROP{0, 0, IROP::vpush, idx*8, dest});
             return dest;
-            
+
         }break;
         case AstNode::AT:{
             if(dest == -1){
@@ -341,6 +342,27 @@ int IRFunction::destOutASTLoad(AstNode *root, int dest){
         case AstNode::UMIN:{
             
         }break;
+        case AstNode::SUBSCR:{
+            AstNode * master = root->children[0];
+            AstNode * arg = root->children[1];
+            if(dest == -1){
+                dest = currstackpos;
+                currstackpos+=8;
+            }
+            LayoutType * vt = (LayoutType*)(*(LayoutType*)master->val_type)["vtable"];
+            int at_idx = vt->indexOf("at");
+            if(at_idx == -1){
+                throw "not found at method at class";
+            }
+            int fa = destOutASTLoad(master, currstackpos);
+            destOutASTLoad(arg, fa+8);
+            
+            operands.push_back(IROP{0, 0, IROP::method_call, dest, fa, at_idx});
+            
+            return dest;
+            
+            
+        };
         default:
             break;
     }

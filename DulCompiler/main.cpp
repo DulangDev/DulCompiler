@@ -27,11 +27,11 @@ int main(int argc, const char * argv[]) {
     // insert code here...
     AstNode * p = AstNode::parseFile("example.dul");
     LayoutType * global = LayoutType::createNamespace();
-    p->setNameScope(global, global);
+    p->children[3]->setNameScope(global, global);
     
    
     setFunctionParenthesisDownwalk(p);
-    p->inferTypes();
+    p->children[3]->inferTypes();
     //p->removeRedundant();
     std::ofstream a("main.ast");
     p->print(0, a);

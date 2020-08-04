@@ -1,17 +1,15 @@
 class B{
-    a:Int
+    
 }
 
 fun main( ){
-    a = 2
-    b = 1939
-    f = fun f(){
-        write b
-        return a
+    class A{
+        g:Int
+        fun at(i:Int) Int{
+            this.g = i
+            return this.g
+        }
     }
-    w = fun wr ( param : ()->Void ){
-        write param
-        write param()
-    }
-    w(f)
+    a = A()
+    write a[701]
 }

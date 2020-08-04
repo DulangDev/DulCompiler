@@ -19,7 +19,9 @@
 #include "IR.hpp"
 #include <assert.h>
 
+static constexpr uint8_t hdrs [] = { 0x55, 0x49, 0x89, 0xFF, 0x49, 0x89, 0xF6, 0x49, 0x89, 0xD5 };;
 
+static constexpr uint8_t nop [] = {0x90};
 class ASMWriter{
     uint8_t * mem;
     int memsize, memcap;
@@ -30,7 +32,9 @@ class ASMWriter{
     const IRFunction * f = nullptr;
     std::vector<stub> stubs;
     ASMWriter(const ASMWriter&) = delete;
-    static const uint8_t hdrs [];
+public:
+    
+private:
     void writeMem(const uint8_t * source, int len){
         size_t demand = (memsize + len) * 1.5;
         if(demand >= memcap){
@@ -41,11 +45,11 @@ class ASMWriter{
         
     }
     void writeHeaders(){
-        writeMem(hdrs, 10);
+        writeMem(hdrs, sizeof(hdrs));
     }
     
     void writeFooter(){
-        uint8_t mem []= {0x41, 0x5D, 0x5d, 0xc3};
+        uint8_t mem []= { 0x5d, 0xc3};
         writeMem(mem, sizeof(mem));
     }
 public:
@@ -155,6 +159,7 @@ public:
         f = func;
         for(auto op: func->operands){
             writeIROP(op);
+            writeMem(nop, sizeof(nop));
         }
         writeFooter();
     }
