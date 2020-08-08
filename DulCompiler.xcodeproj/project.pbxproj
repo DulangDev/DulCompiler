@@ -34,6 +34,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9D0B30E324DACE9C001ABF79 /* A::getAt.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "A::getAt.ir"; sourceTree = "<group>"; };
+		9D0B30E424DACE9C001ABF79 /* A::setAt.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "A::setAt.ir"; sourceTree = "<group>"; };
 		9D4F054124B01D9F006EF571 /* object.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = object.cpp; sourceTree = "<group>"; };
 		9D4F054224B01D9F006EF571 /* object.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = object.hpp; sourceTree = "<group>"; };
 		9D506D77244DBFE00065BB9C /* IR.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IR.cpp; sourceTree = "<group>"; };
@@ -45,11 +47,8 @@
 		9D6132D824D2FABD00ECCB29 /* _.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = _.ir; sourceTree = "<group>"; };
 		9D6132D924D2FCD200ECCB29 /* wr_.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = wr_.ir; sourceTree = "<group>"; };
 		9D6132DA24D2FCD200ECCB29 /* f_.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = f_.ir; sourceTree = "<group>"; };
-		9D61331924D9F23C00ECCB29 /* A::at.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "A::at.ir"; sourceTree = "<group>"; };
 		9D62F5B724CA307800DB1486 /* ex.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ex.ir; sourceTree = "<group>"; };
 		9D62F5B824CBC58600DB1486 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; usesTabs = 1; };
-		9D62F5BA24CCC96B00DB1486 /* A::init.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "A::init.ir"; sourceTree = "<group>"; };
-		9D62F5BB24CCC96B00DB1486 /* A::f.ir */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "A::f.ir"; sourceTree = "<group>"; };
 		9D62F5C024D0B11F00DB1486 /* Bin_class.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Bin_class.cpp; sourceTree = "<group>"; };
 		9D62F5C124D0B11F00DB1486 /* Bin_class.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Bin_class.hpp; sourceTree = "<group>"; };
 		9D8D5871244B6BCF00A8C463 /* DulCompiler */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DulCompiler; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -85,12 +84,11 @@
 		9D506D7D244E3EA40065BB9C /* Testing */ = {
 			isa = PBXGroup;
 			children = (
-				9D61331924D9F23C00ECCB29 /* A::at.ir */,
+				9D0B30E324DACE9C001ABF79 /* A::getAt.ir */,
+				9D0B30E424DACE9C001ABF79 /* A::setAt.ir */,
 				9D6132DA24D2FCD200ECCB29 /* f_.ir */,
 				9D6132D924D2FCD200ECCB29 /* wr_.ir */,
 				9D6132D824D2FABD00ECCB29 /* _.ir */,
-				9D62F5BB24CCC96B00DB1486 /* A::f.ir */,
-				9D62F5BA24CCC96B00DB1486 /* A::init.ir */,
 				9D62F5B724CA307800DB1486 /* ex.ir */,
 				9DF8066924845DE700B274C0 /* main.ir */,
 				9DB0A0F42464D33100D014A7 /* main.ast */,

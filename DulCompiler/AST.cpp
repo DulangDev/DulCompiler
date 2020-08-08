@@ -617,19 +617,6 @@ void AstNode::parseFundecl(LayoutType * os) {
     
     AstNode * body = children[3];
     if(children.size() >= 4){
-        if(args->t == TUPLE){
-            for(auto c : args->children){
-                //must be typedecl, already type inferred
-                
-                localnamescope->addType(c->children[0]->memval, c->children[0]->val_type);
-                
-                
-            }
-        } else if (args->t == TYPEDECL){
-            localnamescope->addType(args->children[0]->memval, args->children[0]->val_type);
-        } else if (args->t != EMPTY){
-#warning TODO: semantic error
-        }
         body->inferTypes();
     }
 }
@@ -640,6 +627,8 @@ void AstNode::inferClassDeclTypes(){
     AstNode * classname = children[0];
     AstNode * body = children[1];
     LayoutType * classLayout = new LayoutType(classname->memval);
+    LayoutType * ns = namescope;
+    setNameScope(classLayout, 0);
     LayoutType * vtable = new LayoutType("vtable");
     classLayout->addType("vtable", vtable);
     for(auto member: body->children){
@@ -685,7 +674,7 @@ void AstNode::inferClassDeclTypes(){
     }
     
     val_type = LayoutType::createFunctionalType(classLayout, &VoidType);
-    namescope->addType(classname->memval, val_type);
+    ns->addType(classname->memval, val_type);
 }
 
 
@@ -951,6 +940,12 @@ void AstNode::inferTypes(){
                 
             } else if(children[0]->t == AT){
                 children[0]->inferTypes();
+            } else if(children[0]->t == SUBSCR){
+                children[0]->children[0]->inferTypes();
+                children[0]->children[1]->inferTypes();
+                children[1]->inferTypes();
+                children[0]->val_type = &VoidType;
+                val_type = &VoidType;
             }
         }break;
         case SUBSCR:{
@@ -959,7 +954,7 @@ void AstNode::inferTypes(){
             if(!val_type){
                 LayoutType * class_type = (LayoutType*)children[0]->val_type;
                 LayoutType * vt = (LayoutType*)(*class_type)["vtable"];
-                LayoutType * at_method = (LayoutType*)(*vt)["at"];
+                LayoutType * at_method = (LayoutType*)(*vt)["getAt"];
                 val_type = (*at_method)["return"];
             }
         }break;

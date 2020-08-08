@@ -139,6 +139,20 @@ void IRFunction::writeStatement(AstNode *statement){
                 int master_place = destOutASTLoad(root->children[0], -1);
                 operands.push_back(IROP{0, 0, IROP::set_member, master_place, master_idx, p});
                 
+            } else if(lhs->t == AstNode::SUBSCR){
+                AstNode * caller = lhs->children[0];
+                AstNode * farg = lhs->children[1];
+                AstNode * other = rhs;
+                LayoutType * vt = (LayoutType*)(*(LayoutType*)caller->val_type)["vtable"];
+                int set_idx = vt->indexOf("setAt");
+                if(set_idx == -1){
+                    throw SemanticError();
+                }
+                int this_pl = destOutASTLoad(caller, currstackpos);
+                int a = destOutASTLoad(farg, currstackpos);
+                destOutASTLoad(other, currstackpos);
+                operands.push_back(IROP{0, 0, IROP::set_member, this_pl, set_idx, a});
+                
             }
         }break;
         case AstNode::WRITE:{
@@ -350,7 +364,7 @@ int IRFunction::destOutASTLoad(AstNode *root, int dest){
                 currstackpos+=8;
             }
             LayoutType * vt = (LayoutType*)(*(LayoutType*)master->val_type)["vtable"];
-            int at_idx = vt->indexOf("at");
+            int at_idx = vt->indexOf("getAt");
             if(at_idx == -1){
                 throw "not found at method at class";
             }

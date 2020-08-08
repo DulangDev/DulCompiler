@@ -37,7 +37,7 @@ ASMWriter::MemFactory R11toRDI          ({0x4C, 0x89, 0xDF}, 0, 0);
 ASMWriter::MemFactory R11toRax          ({0x4C, 0x89, 0xD8}, 0, 0);
 ASMWriter::MemFactory R10dertoR11       ({0x4D, 0x8B, 0x9A, 0x88, 0x00, 0x00, 0x00}, 3, 4);
 ASMWriter::MemFactory R11dertoR11       ({0x4D, 0x8B, 0x9B, 0x88, 0x00, 0x00, 0x00}, 3, 4);
-
+ASMWriter::MemFactory RetStack          ({0x49, 0x81, 0xEF, 0x80, 0x00, 0x00, 0x00}, 3, 4);
 ASMWriter::MemFactory ClosToR10         ({0x4D, 0x8B, 0x95, 0x88, 0x00, 0x00, 0x00}, 3, 4);
 //ASMWriter::MemFactory RaxToStack        ({0x49, 0x89, 0x87, 0x88, 0x00, 0x00, 0x00}, 3, 4);
 
@@ -119,6 +119,7 @@ void ASMWriter::writeIROP(IROP op){
             writeMem(CallRax);
             //put rax to place in stack
             writeMem(RaxToStack(&dest));
+            //writeMem(RetStack(&framesize));
         }break;
         case IROP::ret:{
             writeMem(ReturnVal(&op.dest));
@@ -157,8 +158,9 @@ void ASMWriter::writeIROP(IROP op){
             writeMem(StackShiftToRSI(&op.farg));
             writeMem(DerefRax);
             writeMem(CallRax);
+            if(op.dest != -1)
             writeMem(RaxToStack(&op.dest));
-            
+           
            
           
         }break;

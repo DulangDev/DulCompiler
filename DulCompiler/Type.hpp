@@ -98,7 +98,7 @@ public:
             if(strcmp(name, e.name) == 0){
                 return curridx;
             }
-            curridx += e.t->size;
+            curridx += 8;
         }
         return -1;
     }
