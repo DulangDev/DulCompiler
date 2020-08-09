@@ -3,12 +3,13 @@ fun main( ){
         g:Int
         fun getAt(i:Int) Int{
             return this.g
+            
         }
         fun setAt(i:Int, v:Int){
             write v
         }
     }
     a = A()
-    a.getAt(0)
-    write a
+    write a[0]
+    a[9] = 2
 }

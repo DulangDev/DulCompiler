@@ -56,6 +56,20 @@ AstNode* AstNode::parseCompound(lexIter& iter){
     }
     return block;
 }
+
+AstNode * setAtFromSubscrAss(AstNode *l, AstNode *r){
+    if(l->t == AstNode::TUPLE || r->t == AstNode::TUPLE){
+#warning TODO: design for tuples;
+        return 0;
+    }
+    AstNode * args = new AstNode(AstNode::TUPLE, {l->children[0], l->children[1], r});
+    AstNode * method = new AstNode(AstNode::NAME);
+    strcpy(method->memval, "setAt");
+    AstNode * at = new AstNode(AstNode::AT, {l->children[0], method});
+    return new AstNode(AstNode::FCALL, {at, args});
+}
+
+
 AstNode* AstNode::parseStatement(lexIter& iter){
     // a statement can be either
     // a write statement
@@ -130,6 +144,10 @@ AstNode* AstNode::parseStatement(lexIter& iter){
                 rval = parseFuncDef(iter);
             } else
             rval = parseExpr(iter);
+            if(lval->t == SUBSCR){
+                iter++;
+                return setAtFromSubscrAss(lval, rval);
+            }
             if(next.lexType != Lexem::ASSIGN && !(rval->t == FCALL && lval->t == AT)){
                 throw SyntaxError{next.lineno, next.linepos, (char*)"expected ="};
             } 

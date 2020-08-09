@@ -7,4 +7,8 @@ namestore 8 16 0
 namestore 24 8 0
 vpush 8 32 0
 method_cal 16 24 0
-iwrite 8 0 0
+iwrite 16 0 0
+namestore 24 8 0
+vpush 16 32 0
+vpush 24 40 0
+method_cal 16 24 8

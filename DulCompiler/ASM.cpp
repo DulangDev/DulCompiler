@@ -158,9 +158,10 @@ void ASMWriter::writeIROP(IROP op){
             writeMem(StackShiftToRSI(&op.farg));
             writeMem(DerefRax);
             writeMem(CallRax);
+            writeMem(RetStack(&op.farg));
             if(op.dest != -1)
             writeMem(RaxToStack(&op.dest));
-           
+            
            
           
         }break;

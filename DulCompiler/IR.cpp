@@ -149,9 +149,10 @@ void IRFunction::writeStatement(AstNode *statement){
                     throw SemanticError();
                 }
                 int this_pl = destOutASTLoad(caller, currstackpos);
-                int a = destOutASTLoad(farg, currstackpos);
-                destOutASTLoad(other, currstackpos);
-                operands.push_back(IROP{0, 0, IROP::set_member, this_pl, set_idx, a});
+                currstackpos+=8;
+                int a = destOutASTLoad(farg, -1);
+                int c = destOutASTLoad(other, -1);
+                operands.push_back(IROP{0, 0, IROP::method_call, this_pl, set_idx, a});
                 
             }
         }break;
